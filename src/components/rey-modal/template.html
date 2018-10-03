@@ -1,0 +1,21 @@
+<div id="header">
+  <slot name="header"></slot>
+  <a id="close" title="Close" href="#">&times;</a>
+</div>
+<div id="body">
+  <div id="preface">
+    <slot name="preface"></slot>
+  </div>
+  <div id="footer">
+    <button id="sign">Sign with Metamask</button>
+  </div>
+</div>
+<div id="overlay" class="hidden">
+  <div id="back-container">
+    <a id="back" title="back" href="#">
+      <span id="ang">&lang;</span> Back</a>
+  </div>
+  <div id="overlay-content">
+    <slot name="overlay-content"></slot>
+  </div>
+</div>

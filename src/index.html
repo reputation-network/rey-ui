@@ -1,0 +1,86 @@
+<html>
+<head>
+  <title>Testing REY UI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Lato:300,400');
+    body { font-family: 'Lato', sans-serif; }
+  </style>
+</head>
+<body style="margin: 0">
+  <div style="display: flex;">
+    <div id="allow-to-run">
+      <h2>Allow to run</h2>
+      <div>
+        <label for="source">Source</label>
+        <input name="source" value="0x8d8b3c89fc3ff7739c4aa6ee0a6e629e2472433f"/>
+      </div>
+      <div>
+        <label for="reader">Reader</label>
+        <input name="reader" value="0x8d8b3c89fc3ff7739c4aa6ee0a6e629e2472433f" />
+      </div>
+      <div>
+        <label for="verifier">Verifier</label>
+        <input name="verifier" value="0x8d8b3c89fc3ff7739c4aa6ee0a6e629e2472433f" />
+      </div>
+      <div>
+        <label for="expiration">Expiration</label>
+        <input type="text" name="expiration" />
+      </div>
+      <div>
+        <label for="fee">Fee</label>
+        <input type="text" name="fee" value="0"/>
+      </div>
+      <div>
+        <label for="nonce">Nonce</label>
+        <input type="text" name="nonce" />
+      </div>
+      <div>
+        <button id="open-allow-to-run-prompt">Open allow to run prompt</button>
+      </div>
+    </div>
+    <div id="opt-in">
+      <h2>Opt in</h2>
+      <div>
+        <label for="writer">Writer</label>
+        <input name="writer" value="0x8d8b3c89fc3ff7739c4aa6ee0a6e629e2472433f" />
+      </div>
+      <div>
+        <button id="open-opt-in-prompt">Open opt in prompt</button>
+      </div>
+    </div>
+  </div>
+  <pre id="result"></pre>
+  <script>
+    document.querySelectorAll("input[name=nonce],input[name=expiration]").forEach((e) => {
+      e.value = Math.floor(Date.now() / 1000) + 1 * 3600;
+    })
+  </script>
+  <script>
+    function fields() {
+      return Array.from(document.querySelectorAll("input"))
+        .reduce((v, e) => ({ ...v, [e.name]: e.value }), {});
+    }
+
+    function openPrompt(promptFn) {
+      return async () => {
+        try {
+          const data = await promptFn(fields());
+          pre.innerHTML = JSON.stringify(data, null, 2);
+          pre.style.color = "inherit";
+        } catch (e) {
+          console.error(e);
+          pre.innerHTML = JSON.stringify(e.message, null, 2);
+          pre.style.color = "red";
+        }
+      };
+    }
+
+    const pre = document.querySelector("pre");
+    document.querySelector("#open-allow-to-run-prompt")
+      .addEventListener("click", openPrompt(REY.ui.requestAllowToRunSignature));
+    document.querySelector("#open-opt-in-prompt")
+      .addEventListener("click", openPrompt(REY.ui.requestOptInSignature));
+  </script>
+</body>
+</html>
+
