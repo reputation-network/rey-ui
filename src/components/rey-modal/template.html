@@ -7,7 +7,9 @@
     <slot name="preface"></slot>
   </div>
   <div id="footer">
-    <button id="sign">Sign with Metamask</button>
+    <slot name="footer">
+      <rey-cta-button id="sign">Sign with Metamask</rey-cta-button>
+    </slot>
   </div>
 </div>
 <div id="overlay" class="hidden">

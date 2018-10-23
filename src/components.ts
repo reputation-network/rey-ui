@@ -1,5 +1,6 @@
 import ReyAppHeaderComponent from "./components/rey-app-header";
 import ReyAppNameComponent from "./components/rey-app-name";
+import ReyCtaButtonComponent from "./components/rey-cta-button";
 import ReyModalComponent from "./components/rey-modal";
 import ReyPortalComponent from "./components/rey-portal";
 import { ReyPrefaceAllowToRun, ReyPrefaceOptIn, ReyPrefaceSelfRun } from "./components/rey-preface";
@@ -17,6 +18,7 @@ export default function registerComponents() {
   const customElements: Array<[string, any]> = [
     ["rey-app-header", ReyAppHeaderComponent],
     ["rey-app-name", ReyAppNameComponent],
+    ["rey-cta-button", ReyCtaButtonComponent],
     ["rey-preface-allow-to-run", ReyPrefaceAllowToRun],
     ["rey-portal", ReyPortalComponent],
     ["rey-preface-opt-in", ReyPrefaceOptIn],
@@ -36,6 +38,7 @@ export default function registerComponents() {
 export {
   ReyAppHeaderComponent,
   ReyAppNameComponent,
+  ReyCtaButtonComponent,
   ReyPortalComponent,
   ReyPrefaceAllowToRun,
   ReyPrefaceOptIn,
