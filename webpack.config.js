@@ -17,7 +17,7 @@ module.exports = (env, argv) => ({
     rules: [
       { test: /\.ts$/, loader: "ts-loader", },
       { test: /\.css$/, loader: "css-loader", },
-      { test: /\.svg$/, loader: "url-loader", },
+      { test: /\.(svg|png)$/, loader: "url-loader", },
       { test: /\.html$/, loader: "html-loader", },
     ],
   },

@@ -1,0 +1,22 @@
+:host {
+  --default-accent-color: #2CBFD1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: var(--font-size, var(--default-font-size));
+}
+
+h2 {
+  font-weight: normal;
+  letter-spacing: 1px;
+  color: var(--accent-color, var(--default-accent-color));
+}
+
+p {
+  font-weight: lighter;
+  letter-spacing: 1px;
+}
+
+a {
+  color: var(--accent-color, var(--default-accent-color));
+}

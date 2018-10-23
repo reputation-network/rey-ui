@@ -1,6 +1,7 @@
 import { ReadPermission, Session, WritePermission } from "rey-sdk/dist/structs";
 import {
   ReyAppHeaderComponent,
+  ReyErrorComponent,
   ReyModalComponent,
   ReyPortalComponent,
   ReyPrefaceAllowToRun,
@@ -59,7 +60,23 @@ function buildAllowToRunModal(
   return ReyPortalComponent.wrap(modal);
 }
 
+function buildErrorModal(error: Error) {
+  const modal = new ReyModalComponent();
+  modal.classList.add("light-header");
+
+  const preface = new ReyErrorComponent(error);
+  preface.slot = "preface";
+
+  const footer = document.createElement("div");
+  footer.slot = "footer";
+
+  modal.appendChild(preface);
+  modal.appendChild(footer);
+  return ReyPortalComponent.wrap(modal);
+}
+
 export {
   buildAllowToRunModal,
   buildOptInModal,
+  buildErrorModal,
 };
