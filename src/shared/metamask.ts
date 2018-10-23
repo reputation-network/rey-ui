@@ -23,14 +23,19 @@ async function ethereumProvider() {
   }
 }
 
-async function accounts() {
+async function _sendAsync<T= any>(method: string, params: any[] = []): Promise<T> {
   const ethProvider = await ethereumProvider();
-  return new Promise((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     const cb = (err, data) => {
       err ? reject(err) : resolve(data.result);
     };
-    ethProvider.sendAsync({ method: "eth_accounts", params: [] }, cb);
+    ethProvider.sendAsync({ method, params }, cb);
   });
+}
+
+async function accounts() {
+  const accs = await _sendAsync("eth_accounts");
+  return accs;
 }
 
 async function defaultAccount() {
@@ -39,14 +44,14 @@ async function defaultAccount() {
 }
 
 async function personalSign(message: any, address: string) {
-  const ethProvider = await ethereumProvider();
-  return new Promise((resolve, reject) => {
-    const params = [message, address, null];
-    const cb = (err, data) => {
-      err ? reject(err) : resolve(data.result);
-    };
-    ethProvider.sendAsync({ method: "personal_sign", params }, cb);
-  });
+  const params = [message, address, null];
+  const signature = await _sendAsync("personal_sign", params);
+  return signature;
+}
+
+async function getNetwork() {
+  const netId = await _sendAsync("net_version");
+  return netId;
 }
 
 export {
@@ -54,4 +59,5 @@ export {
   accounts,
   defaultAccount,
   personalSign,
+  getNetwork,
 };
