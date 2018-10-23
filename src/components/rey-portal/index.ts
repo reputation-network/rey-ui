@@ -1,3 +1,5 @@
+import { CloseModalEvent } from "../../shared/events";
+
 export default class ReyPortalComponent extends HTMLElement {
   public static wrap(elem: HTMLElement) {
     const portal = new ReyPortalComponent();
@@ -15,5 +17,9 @@ export default class ReyPortalComponent extends HTMLElement {
     root.name = "root";
     shadowRoot.appendChild(style);
     shadowRoot.appendChild(root);
+    this.addEventListener("click", () => {
+      this.dispatchEvent(new CloseModalEvent());
+      this.remove();
+    }, { once: true });
   }
 }
