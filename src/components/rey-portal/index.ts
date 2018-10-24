@@ -17,9 +17,10 @@ export default class ReyPortalComponent extends HTMLElement {
     root.name = "root";
     shadowRoot.appendChild(style);
     shadowRoot.appendChild(root);
-    this.addEventListener("click", () => {
-      this.dispatchEvent(new CloseModalEvent());
-      this.remove();
-    }, { once: true });
+    this.addEventListener("click", (ev) => {
+      if (ev.target === this) {
+        this.dispatchEvent(new CloseModalEvent());
+      }
+    });
   }
 }
