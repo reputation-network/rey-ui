@@ -37,6 +37,8 @@ export default class ReyStructLabelComponent extends HTMLElement {
       return require("./templates/read-permission.html");
     } else if (struct instanceof WritePermission) {
       return require("./templates/write-permission.html");
+    } else if (struct instanceof Request) {
+      return require("./templates/request.html");
     }
   }
 

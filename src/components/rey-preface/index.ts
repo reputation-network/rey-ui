@@ -19,14 +19,14 @@ export default function ReyPreface(template: string) {
     }
 
     public static get observedAttributes() {
-      return ["message-count", "reader", "source", "verifier", "writer"];
+      return ["cost", "message-count", "reader", "source", "verifier", "writer"];
     }
 
     public attributeChangedCallback(name, oldValue, newValue) {
-      if (name === "message-count") {
-        const msgCountElem: HTMLSpanElement = this.shadowRoot
-          .querySelector("#message-count");
-        if (msgCountElem) { msgCountElem.innerText = `${newValue}`; }
+      if (["cost", "message-count"].indexOf(name) >= 0) {
+        const elem: HTMLSpanElement = this.shadowRoot
+          .querySelector(`#${name}`);
+        if (elem) { elem.innerText = `${newValue}`; }
       } else if (newValue && oldValue !== newValue) {
         const elems = this.shadowRoot
           .querySelectorAll<ReyAppNameComponent>(`rey-app-name.${name}`);

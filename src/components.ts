@@ -2,6 +2,7 @@ import ReyAppHeaderComponent from "./components/rey-app-header";
 import ReyAppNameComponent from "./components/rey-app-name";
 import ReyCtaButtonComponent from "./components/rey-cta-button";
 import ReyErrorComponent from "./components/rey-error";
+import ReyLoaderComponent from "./components/rey-loader";
 import ReyModalComponent from "./components/rey-modal";
 import ReyPortalComponent from "./components/rey-portal";
 import { ReyPrefaceAllowToRun, ReyPrefaceOptIn, ReyPrefaceSelfRun } from "./components/rey-preface";
@@ -21,6 +22,7 @@ export default function registerComponents() {
     ["rey-app-name", ReyAppNameComponent],
     ["rey-cta-button", ReyCtaButtonComponent],
     ["rey-error", ReyErrorComponent],
+    ["rey-loader", ReyLoaderComponent],
     ["rey-preface-allow-to-run", ReyPrefaceAllowToRun],
     ["rey-portal", ReyPortalComponent],
     ["rey-preface-opt-in", ReyPrefaceOptIn],
@@ -42,6 +44,7 @@ export {
   ReyAppNameComponent,
   ReyCtaButtonComponent,
   ReyErrorComponent,
+  ReyLoaderComponent,
   ReyPortalComponent,
   ReyPrefaceAllowToRun,
   ReyPrefaceOptIn,

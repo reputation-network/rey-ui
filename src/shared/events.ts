@@ -26,3 +26,9 @@ export class CloseModalEvent extends Event {
     super("close", { bubbles: true, composed: true, cancelable: true });
   }
 }
+
+export class ActionEvent extends Event {
+  constructor(action: string) {
+    super(`action:${action}`, { bubbles: true, composed: true, cancelable: true });
+  }
+}

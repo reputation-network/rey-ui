@@ -20,7 +20,7 @@
       </div>
       <div>
         <label for="verifier">Verifier</label>
-        <input name="verifier" value="0x8d8b3c89fc3ff7739c4aa6ee0a6e629e2472433f" />
+        <input name="verifier" value="0xd91f44fee5e3b81f61b4e7ab7fddf3f4caab1220" />
       </div>
       <div>
         <label for="expiration">Expiration</label>
@@ -48,6 +48,28 @@
         <button id="open-opt-in-prompt">Open opt in prompt</button>
       </div>
     </div>
+    <div id="self-run">
+      <h2>Self run</h2>
+      <div>
+        <label for="source">Source</label>
+        <input name="source" value="0x8d8b3c89fc3ff7739c4aa6ee0a6e629e2472433f" />
+      </div>
+      <div>
+        <label for="verifier">Verifier</label>
+        <input name="verifier" value="0xd91f44fee5e3b81f61b4e7ab7fddf3f4caab1220" />
+      </div>
+      <div>
+        <label for="fee">Fee</label>
+        <input type="text" name="fee" value="0" />
+      </div>
+      <div>
+        <label for="nonce">Nonce</label>
+        <input type="text" name="nonce" />
+      </div>
+      <div>
+        <button id="open-self-run-prompt">Open self run prompt</button>
+      </div>
+    </div>
   </div>
   <pre id="result"></pre>
   <script>
@@ -56,15 +78,15 @@
     })
   </script>
   <script>
-    function fields() {
-      return Array.from(document.querySelectorAll("input"))
+    function fields(formSelector) {
+      return Array.from(document.querySelectorAll([formSelector, "input"].join(" ")))
         .reduce((v, e) => ({ ...v, [e.name]: e.value }), {});
     }
 
-    function openPrompt(promptFn) {
+    function openPrompt(formSelector, promptFn) {
       return async () => {
         try {
-          const data = await promptFn(fields());
+          const data = await promptFn(fields(formSelector));
           pre.innerHTML = JSON.stringify(data, null, 2);
           pre.style.color = "inherit";
         } catch (e) {
@@ -77,9 +99,11 @@
 
     const pre = document.querySelector("pre");
     document.querySelector("#open-allow-to-run-prompt")
-      .addEventListener("click", openPrompt(REY.ui.requestAllowToRunSignature));
+      .addEventListener("click", openPrompt("#allow-to-run", REY.ui.requestAllowToRunSignature));
     document.querySelector("#open-opt-in-prompt")
-      .addEventListener("click", openPrompt(REY.ui.requestOptInSignature));
+      .addEventListener("click", openPrompt("#opt-in", REY.ui.requestOptInSignature));
+    document.querySelector("#open-self-run-prompt")
+      .addEventListener("click", openPrompt("#self-run", REY.ui.requestSelfRunSignature));
   </script>
 </body>
 </html>
