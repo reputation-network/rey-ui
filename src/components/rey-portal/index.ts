@@ -10,7 +10,7 @@ export default class ReyPortalComponent extends HTMLElement {
 
   constructor() {
     super();
-    const shadowRoot = this.attachShadow({ mode: "open" });
+    const shadowRoot = this.attachShadow({ mode: "closed" });
     const style = document.createElement("style");
     style.textContent = require("./styles.css");
     const root = document.createElement("slot");
