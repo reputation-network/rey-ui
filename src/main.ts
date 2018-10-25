@@ -188,6 +188,9 @@ async function requestOptInSignature(opts: {
   await registerComponents();
   await assertEthereumEnabledBrowser();
 
+  const app = await App(opts.writer);
+  await app.manifest(); // Load the manifest so we ensure a valid app
+
   const subject = await defaultAccount();
   const writer = opts.writer;
   const _writePermission = await Factory.buildWritePermission(
