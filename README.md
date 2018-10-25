@@ -38,10 +38,10 @@ async function requestAccessToApp() {
 
 ### Without a bundler
 
-First inlcude the REY ui script file in your page
+First inlcude the REY ui script file in your page, provided by [jsDelivr](https://www.jsdelivr.com)
 ```html
-<script src="https://raw.githubusercontent.com/reputation-network/rey-sdk-js/master/dist/rey-sdk.js"></script>
-<script src="https://raw.githubusercontent.com/reputation-network/rey-ui/master/dist/rey-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/reputation-network/rey-sdk-js@latest/dist/rey-sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/reputation-network/rey-ui@latest/dist/rey-ui.js"></script>
 ```
 
 Then you can follow the bundler example but translating the imports into the following:
