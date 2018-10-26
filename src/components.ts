@@ -36,7 +36,22 @@ export default function registerComponents() {
       window.customElements.define(selector, clazz);
     }
     return window.customElements.whenDefined(selector);
-  })).then(() => undefined);
+  })).then(() => loadRequiredFonts());
+}
+
+function loadRequiredFonts(): Promise<void> {
+  if (document.querySelectorAll(".rey-ui-font").length > 0) {
+    return Promise.resolve();
+  }
+  const link = document.createElement("link");
+  link.classList.add("rey-ui-font");
+  link.setAttribute("rel", "stylesheet");
+  link.setAttribute("href", "https://fonts.googleapis.com/css?family=Lato:300,400,700");
+  document.head.appendChild(link);
+  return new Promise((resolve, reject) => {
+    link.onload = () => resolve();
+    link.onerror = () => reject();
+  });
 }
 
 export {
