@@ -11,3 +11,9 @@ export class UnsupportedEthNetworkError extends Error {
     super("Unsupported ethereum network selected by the ethereum provider");
   }
 }
+
+export class MissingEthProviderAccountError extends Error {
+  constructor() {
+    super("No default account was found on the ethereum provider");
+  }
+}

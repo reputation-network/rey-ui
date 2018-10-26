@@ -1,4 +1,8 @@
-import { MissingEthProviderError, UnsupportedEthNetworkError} from "../../shared/errors";
+import {
+  MissingEthProviderAccountError,
+  MissingEthProviderError,
+  UnsupportedEthNetworkError,
+} from "../../shared/errors";
 
 export default class ReyErrorComponent extends HTMLElement {
   constructor(error: Error) {
@@ -21,6 +25,8 @@ export default class ReyErrorComponent extends HTMLElement {
       return require("./templates/missing-provider.html");
     } else if (error instanceof UnsupportedEthNetworkError) {
       return require("./templates/unsupported-network.html");
+    } else if (error instanceof MissingEthProviderAccountError) {
+      return require("./templates/missing-account.html");
     } else {
       return require("./templates/generic.html");
     }

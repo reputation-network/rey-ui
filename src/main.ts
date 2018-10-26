@@ -4,9 +4,9 @@ import Factory from "rey-sdk/dist/structs/factory";
 import registerComponents, { ReyLoaderComponent, ReyPortalComponent } from "./components";
 import { buildAllowToRunModal, buildErrorModal, buildOptInModal, buildSelfRunModal } from "./modals";
 import App from "./shared/app";
-import { MissingEthProviderError, UnsupportedEthNetworkError } from "./shared/errors";
+import { MissingEthProviderAccountError, MissingEthProviderError, UnsupportedEthNetworkError } from "./shared/errors";
 import EthereumNetwork from "./shared/ethereum-networks";
-import { defaultAccount, ethereumProvider, getNetwork } from "./shared/metamask";
+import * as metamask from "./shared/metamask";
 
 async function handleModalActions<T>(modal: HTMLElement, onSign: () => Promise<T>): Promise<T> {
   const portal = ReyPortalComponent.wrap(modal);
@@ -33,13 +33,17 @@ async function showError(error: Error): Promise<never> {
 }
 
 async function assertEthereumEnabledBrowser() {
-  const provider = await ethereumProvider();
+  const provider = await metamask.ethereumProvider();
   if (!provider) {
     await showError(new MissingEthProviderError());
   }
-  const netId = await getNetwork();
+  const netId = await metamask.getNetwork();
   if (netId !== EthereumNetwork.RINKEBY) {
     await showError(new UnsupportedEthNetworkError());
+  }
+  const account = await metamask.defaultAccount();
+  if (!account) {
+    await showError(new MissingEthProviderAccountError());
   }
 }
 
@@ -90,7 +94,7 @@ async function requestAllowToRunSignature(opts: {
   const sourceAppManifestEntry = await sourceApp.manifestEntry();
   const verifierManifest = await verifierApp.manifest();
 
-  const subject = await defaultAccount();
+  const subject = await metamask.defaultAccount();
   const { reader, source, verifier, expiration, nonce } = opts;
   const manifest = sourceAppManifestEntry.hash;
   const fee = verifierManifest.verifier_fee || 0;
@@ -129,7 +133,7 @@ async function requestSelfRunSignature(opts: {
   const sourceApp = await App(opts.source);
   const sourceAppManifestEntry = await sourceApp.manifestEntry();
 
-  const subject = await defaultAccount();
+  const subject = await metamask.defaultAccount();
   const reader = subject;
   const expiration = Math.floor(Date.now() / 1000) + 60 * 5;
   const { source, verifier, fee, nonce } = opts;
@@ -191,7 +195,7 @@ async function requestOptInSignature(opts: {
   const app = await App(opts.writer);
   await app.manifest(); // Load the manifest so we ensure a valid app
 
-  const subject = await defaultAccount();
+  const subject = await metamask.defaultAccount();
   const writer = opts.writer;
   const _writePermission = await Factory.buildWritePermission(
     { subject, writer }, DummySign());
