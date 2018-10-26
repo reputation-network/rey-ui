@@ -1,7 +1,7 @@
 import { ActionEvent } from "../../shared/events";
 
 export default class ReyCtaButtonComponent extends HTMLElement {
-  private btn: HTMLButtonElement;
+  private _btn: HTMLButtonElement;
 
   constructor() {
     super();
@@ -11,7 +11,7 @@ export default class ReyCtaButtonComponent extends HTMLElement {
     style.textContent = require("./styles.css");
     shadowRoot.appendChild(style);
 
-    const btn = this.btn = document.createElement("button");
+    const btn = this._btn = document.createElement("button");
 
     this.addEventListener("click", (ev) => {
       ev.preventDefault(); ev.stopPropagation();
@@ -29,6 +29,6 @@ export default class ReyCtaButtonComponent extends HTMLElement {
 
   public set innerText(text: string) {
     super.innerText = text;
-    this.btn.innerText = text;
+    this._btn.innerText = text;
   }
 }

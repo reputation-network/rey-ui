@@ -7,8 +7,7 @@ export default class ReyAppNameComponent extends HTMLElement {
   constructor(address: string) {
     super();
     const shadow = this.attachShadow({ mode: "open" });
-    shadow.innerHTML = require("./template.html");
-    this._name = shadow.querySelector("span");
+    this._name = shadow.appendChild(document.createElement("span"));
 
     this._name.addEventListener("click", (ev) => {
       ev.preventDefault(); ev.stopPropagation();

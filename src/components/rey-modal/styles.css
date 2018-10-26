@@ -1,5 +1,4 @@
 :host {
-  all: initial;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -10,10 +9,10 @@
   box-shadow: 0 0 40px 0 rgba(37,155,232,0.23);
   border-radius: 8px;
   font-family: 'Lato', sans-serif;
-  font-weight: lighter;
+  font-weight: 300;
   letter-spacing: 2px;
   position: relative;
-  font-size: 12px;
+  font-size: 14px;
   --accent-color: #2CBFD1;
   --header-font-color:  #ffffff;
   --header-background-color:  #000000;
@@ -24,10 +23,6 @@
   --header-font-color: #000000;
   --header-background-color: transparent;
   --close-btn-color: var(--accent-color, #000000);
-}
-
-* {
-  box-sizing: border-box;
 }
 
 #header {

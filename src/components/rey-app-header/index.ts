@@ -4,7 +4,7 @@ import ReyAppNameComponent from "../rey-app-name";
 
 export default class ReyAppHeaderComponent extends HTMLElement {
   private _name: ReyAppNameComponent;
-  private _description: HTMLImageElement;
+  private _description: HTMLParagraphElement;
   private _icon: HTMLImageElement;
 
   constructor(address: string) {
@@ -16,8 +16,8 @@ export default class ReyAppHeaderComponent extends HTMLElement {
     shadow.appendChild(style);
 
     this._name = shadow.querySelector("rey-app-name");
-    this._description = shadow.querySelector("#description");
-    this._icon = shadow.querySelector("#icon");
+    this._description = shadow.querySelector("p");
+    this._icon = shadow.querySelector("img");
 
     const handleClick = (ev) => {
       ev.preventDefault(); ev.stopPropagation();

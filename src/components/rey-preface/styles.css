@@ -1,27 +1,24 @@
 :host {
-  --default-accent-color: #2CBFD1;
-  --default-font-size: 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: var(--font-size, var(--default-font-size));
 }
 
 h2 {
   font-weight: normal;
-  font-size: 18px;
+  font-size: 1.285em;
   letter-spacing: 1px;
-  color: var(--accent-color, var(--default-accent-color));
+  color: var(--accent-color);
 }
 
 p {
   font-weight: lighter;
-  font-size: 12px;
+  font-size: 1em;
   letter-spacing: 1px;
 }
 
 a {
-  color: var(--accent-color, var(--default-accent-color));
+  color: var(--accent-color);
 }
 
 rey-app-name {

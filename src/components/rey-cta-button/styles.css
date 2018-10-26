@@ -1,19 +1,19 @@
 :host {
-  display: inline-block;
-}
-
-button {
+  display: block;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+button {
   border: none;
   outline: none;
   cursor: pointer;
   color: #FFFFFF;
-  font-weight: lighter;
+  font-weight: 300;
   text-transform: uppercase;
   text-align: center;
-  font-size: 1.1em;
+  font-size: 1em;
   letter-spacing: 2pt;
   line-height: 1.75em;
   border-radius: 20px;

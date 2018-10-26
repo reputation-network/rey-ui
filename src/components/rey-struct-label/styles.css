@@ -1,11 +1,10 @@
 :host {
   display: block;
   padding: 8px 0;
-  --default-accent-color: #2CBFD1;
 }
 
 .details, details:visited, details:active {
-  color: var(--accent-color, var(--default-accent-color));
+  color: var(--accent-color);
   text-decoration: none;
   margin-left: 4px;
 }
@@ -23,7 +22,7 @@ pre {
   line-height: initial;
   word-break: break-all;
   white-space: pre-wrap;
-  color: var(--accent-color, var(--default-accent-color));
+  color: var(--accent-color);
 }
 
 .hidden {
