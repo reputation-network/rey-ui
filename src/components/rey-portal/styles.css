@@ -9,3 +9,22 @@
   height: 100%;
   width: 100%;
 }
+
+@keyframes entry {
+  0% {
+    transform: translateY(120px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.enter-animation, .leave-animation {
+  animation: entry 250ms forwards;
+}
+
+.leave-animation {
+  animation-direction: reverse;
+}

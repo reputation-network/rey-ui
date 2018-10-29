@@ -43,6 +43,7 @@
   color: var(--close-btn-color, #ffffff);
   font-size: 32px;
   text-decoration: none;
+  z-index: 1;
 }
 
 #body {
@@ -66,12 +67,13 @@
   height: 100%;
   color: #000000;
   padding: 12px 24px 24px;
-  transition: left 0.5s ease-in;
-  left: 0;
+  transition: transform 300ms linear;
+  will-change: transform;
+  transform: translateX(0);
 }
 
 #overlay.hidden {
-  left: 1000px;
+  transform: translateX(100%);
 }
 
 #overlay #back {

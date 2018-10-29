@@ -11,7 +11,6 @@ export default class ReyModalComponent extends HTMLElement {
 
     // Handle click events on app names on any child element
     this.addEventListener("app-click", (ev: AppClickEvent) => {
-      ev.preventDefault(); ev.stopPropagation();
       window.open(`https://explorer.reputation.network/app/${ev.appAddress}`);
     });
 
@@ -22,14 +21,12 @@ export default class ReyModalComponent extends HTMLElement {
       overlay.classList.add("hidden");
     });
     this.addEventListener("preface-details", (ev) => {
-      ev.preventDefault();
       overlay.classList.remove("hidden");
     });
 
     // Handle modal button actions
     const handleBtnClick = (btn: HTMLElement, EventClazz: any) => {
       btn.addEventListener("click", (ev) => {
-        ev.preventDefault(); ev.stopPropagation();
         this.dispatchEvent(new EventClazz());
       });
     };
