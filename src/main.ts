@@ -160,6 +160,9 @@ async function openSelfRunPrompt(opts: { source: string }) {
     } finally {
       loader.remove();
     }
+    // Return a promise that never completes, so the modal stays open
+    // until closed, which is treated as a thrown error
+    return new Promise(() => undefined);
   }).then(() => undefined, () => undefined);
 }
 
