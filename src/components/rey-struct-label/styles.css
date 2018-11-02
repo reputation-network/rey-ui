@@ -18,11 +18,8 @@
   margin-right: 16px;
 }
 
-pre {
-  line-height: initial;
-  word-break: break-all;
-  white-space: pre-wrap;
-  color: var(--accent-color);
+rey-pre {
+  max-height: none;
 }
 
 .hidden {
