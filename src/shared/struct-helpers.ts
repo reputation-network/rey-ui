@@ -6,6 +6,35 @@ import EncryptionKey from "rey-sdk/dist/utils/encryption-key";
 import App from "./app";
 import { defaultAccount } from "./metamask";
 
+interface IReadPermissionOpts {
+  reader: string;
+  source: string;
+  subject?: string;
+  expiration?: number | string;
+}
+
+interface ISessionOpts {
+  subject?: string;
+  verifier?: string;
+  nonce?: number | string;
+}
+
+interface IRequestOpts {
+  value?: number;
+  counter?: number | string;
+}
+
+interface IWritePermissionOpts {
+  subject?: string;
+  writer: string;
+}
+
+type AppParamsOpts = &
+  IRequestOpts &
+  ISessionOpts &
+  Pick<IReadPermissionOpts, Exclude<keyof IReadPermissionOpts, "reader">> &
+  { encryptionKey?: EncryptionKey };
+
 function _expiration(opts: Pick<IReadPermissionOpts, "expiration">) {
   if (!opts.expiration) {
     const hours = 1;
@@ -30,18 +59,13 @@ function _counter(opts: Pick<IRequestOpts, "counter">) {
   return opts.counter || Date.now();
 }
 
-async function _value(opts: IRequestOpts) {
-  return 0; // FIXME: This should be read from the app manifest
+async function _value(opts: IRequestOpts & Pick<IReadPermissionOpts, "source">) {
+  const app = await App(opts.source);
+  const manifest = await app.manifest();
+  return manifest.app_reward || 0;
 }
 
-interface IReadPermissionOpts {
-  reader: string;
-  source: string;
-  subject?: string;
-  expiration?: number|string;
-}
-
-export async function buildReadPermission(
+async function buildReadPermission(
   opts: IReadPermissionOpts,
   sign: SignStrategy,
 ) {
@@ -59,21 +83,7 @@ export async function buildReadPermission(
   ]);
 }
 
-export function buildUnsignedReadPermission(opts: IReadPermissionOpts) {
-  return buildReadPermission(opts, DummySign());
-}
-
-export function buildSignedReadPermission(opts: IReadPermissionOpts) {
-  return buildReadPermission(opts, MetamaskSign());
-}
-
-interface ISessionOpts {
-  subject?: string;
-  verifier?: string;
-  nonce?: number | string;
-}
-
-export async function buildSession(opts: ISessionOpts, sign: SignStrategy) {
+async function buildSession(opts: ISessionOpts, sign: SignStrategy) {
   const verifier = _verifier(opts);
   const nonce = _nonce(opts);
   const subject = await _subject(opts);
@@ -81,20 +91,7 @@ export async function buildSession(opts: ISessionOpts, sign: SignStrategy) {
   return Factory.buildSession({ subject, nonce, verifier, fee }, sign);
 }
 
-export function buildUnsignedSession(opts: ISessionOpts) {
-  return buildSession(opts, DummySign());
-}
-
-export function buildSignedSession(opts: ISessionOpts) {
-  return buildSession(opts, MetamaskSign());
-}
-
-interface IWritePermissionOpts {
-  subject?: string;
-  writer: string;
-}
-
-export async function buildWritePermission(
+async function buildWritePermission(
   opts: IWritePermissionOpts,
   sign: SignStrategy,
 ) {
@@ -103,25 +100,7 @@ export async function buildWritePermission(
   return Factory.buildWritePermission({ subject, writer }, sign);
 }
 
-export function buildUnsignedWritePermission(opts: IWritePermissionOpts) {
-  return buildWritePermission(opts, DummySign());
-}
-
-export function buildSignedWritePermission(opts: IWritePermissionOpts) {
-  return buildWritePermission(opts, MetamaskSign());
-}
-
-interface IRequestOpts {
-  value?: number;
-  counter?: number|string;
-}
-type AppParamsOpts = &
-  IRequestOpts &
-  ISessionOpts &
-  Pick<IReadPermissionOpts, Exclude<keyof IReadPermissionOpts, "reader">> &
-  { encryptionKey?: any };
-
-export async function buildEncryptionKey(opts: any, sign: SignStrategy) {
+async function buildEncryptionKey(opts: AppParamsOpts, sign: SignStrategy) {
   if (!opts.encryptionKey) {
     const encryptionKey = new EncryptionKey();
     await encryptionKey.createPair();
@@ -131,13 +110,14 @@ export async function buildEncryptionKey(opts: any, sign: SignStrategy) {
   }
 }
 
-export async function buildAppParams(opts: AppParamsOpts, sign: SignStrategy) {
+async function buildAppParams(opts: AppParamsOpts, sign: SignStrategy) {
   const subject = await _subject(opts);
+  const reader = subject;
   const value = await _value(opts);
   const counter = _counter(opts);
   const [session, [readPermission, ...extraReadPermissions], encryptionKey] = await Promise.all([
     buildSession(opts, sign),
-    buildReadPermission({ ...opts, reader: subject } as IReadPermissionOpts, sign),
+    buildReadPermission({ ...opts, reader } as IReadPermissionOpts, sign),
     buildEncryptionKey(opts, sign),
   ]);
   return Factory.buildAppParams({
@@ -147,10 +127,20 @@ export async function buildAppParams(opts: AppParamsOpts, sign: SignStrategy) {
   }, sign);
 }
 
-export function buildUnsignedAppParams(opts: AppParamsOpts) {
-  return buildAppParams(opts, DummySign());
+type StructBuilder<P, R> = (opts: P, sign: SignStrategy) => Promise<R>;
+
+function unsigned<P, R>(builder: StructBuilder<P, R>) {
+  return (opts: P) => builder(opts, DummySign());
+}
+function signed<P, R>(builder: StructBuilder<P, R>) {
+  return (opts: P) => builder(opts, MetamaskSign());
 }
 
-export function buildSignedAppParams(opts: AppParamsOpts) {
-  return buildAppParams(opts, MetamaskSign());
-}
+export const buildUnsignedSession = unsigned(buildSession);
+export const buildSignedSession = signed(buildSession);
+export const buildUnsignedReadPermission = unsigned(buildReadPermission);
+export const buildSignedReadPermission = signed(buildReadPermission);
+export const buildUnsignedWritePermission = unsigned(buildWritePermission);
+export const buildSignedWritePermission = signed(buildWritePermission);
+export const buildUnsignedAppParams = unsigned(buildAppParams);
+export const buildSignedAppParams = signed(buildAppParams);

@@ -112,11 +112,7 @@ async function requestAllowToRunSignature(opts: {
   });
 }
 
-async function requestSelfRunSignature(opts: {
-  source: string,
-  verifier?: string,
-  nonce?: number|string,
-}) {
+async function requestSelfRunSignature(opts: { source: string }) {
   await registerComponents();
   await assertEthereumEnabledBrowser();
   const _appParams = await buildUnsignedAppParams(opts);
