@@ -4,7 +4,7 @@ import manifestCache from "./manifest-cache";
 import { ethereumProvider } from "./metamask";
 
 export default async function App(address: string) {
-  const web3Provider = await ethereumProvider();
-  const contract = TestnetContract(web3Provider);
+  const ethProvider = await ethereumProvider();
+  const contract = TestnetContract(ethProvider);
   return new AppClient(address, { contract, manifestCache });
 }

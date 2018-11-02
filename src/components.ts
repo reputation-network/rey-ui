@@ -5,6 +5,7 @@ import ReyErrorComponent from "./components/rey-error";
 import ReyLoaderComponent from "./components/rey-loader";
 import ReyModalComponent from "./components/rey-modal";
 import ReyPortalComponent from "./components/rey-portal";
+import ReyPreComponent from "./components/rey-pre";
 import { ReyPrefaceAllowToRun, ReyPrefaceOptIn, ReyPrefaceSelfRun } from "./components/rey-preface";
 import ReyStructLabelComponent from "./components/rey-struct-label";
 import { hasSlotSupport, hasWebComponentSupport } from "./shared/dom-utils";
@@ -25,6 +26,7 @@ export default function registerComponents() {
     ["rey-loader", ReyLoaderComponent],
     ["rey-preface-allow-to-run", ReyPrefaceAllowToRun],
     ["rey-portal", ReyPortalComponent],
+    ["rey-pre", ReyPreComponent],
     ["rey-preface-opt-in", ReyPrefaceOptIn],
     ["rey-preface-self-run", ReyPrefaceSelfRun],
     ["rey-struct-label", ReyStructLabelComponent],
@@ -61,6 +63,7 @@ export {
   ReyErrorComponent,
   ReyLoaderComponent,
   ReyPortalComponent,
+  ReyPreComponent,
   ReyPrefaceAllowToRun,
   ReyPrefaceOptIn,
   ReyPrefaceSelfRun,

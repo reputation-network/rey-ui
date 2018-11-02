@@ -1,12 +1,19 @@
-import DummySign from "rey-sdk/dist/sign-strategies/dummy";
-import MetamaskSign from "rey-sdk/dist/sign-strategies/metamask";
-import Factory from "rey-sdk/dist/structs/factory";
-import registerComponents, { ReyLoaderComponent, ReyPortalComponent } from "./components";
+import registerComponents, { ReyLoaderComponent, ReyPortalComponent, ReyPreComponent } from "./components";
 import { buildAllowToRunModal, buildErrorModal, buildOptInModal, buildSelfRunModal } from "./modals";
 import App from "./shared/app";
 import { MissingEthProviderAccountError, MissingEthProviderError, UnsupportedEthNetworkError } from "./shared/errors";
 import EthereumNetwork from "./shared/ethereum-networks";
 import * as metamask from "./shared/metamask";
+import {
+  buildSignedAppParams,
+  buildSignedReadPermission,
+  buildSignedSession,
+  buildSignedWritePermission,
+  buildUnsignedAppParams,
+  buildUnsignedReadPermission,
+  buildUnsignedSession,
+  buildUnsignedWritePermission,
+} from "./shared/struct-helpers";
 
 async function handleModalActions<T>(modal: HTMLElement, onSign: () => Promise<T>): Promise<T> {
   const portal = ReyPortalComponent.wrap(modal);
@@ -15,10 +22,18 @@ async function handleModalActions<T>(modal: HTMLElement, onSign: () => Promise<T
     portal.addEventListener("close", _reject);
     modal.addEventListener("close", _reject);
     // Allow escape to be used to close the modal
-    document.addEventListener("keydown",
-      (ev) => ev.keyCode === 27 && _reject(), { once: true });
-    modal.addEventListener("sign", () => {
+    const escListener = (ev) => {
+      if (ev.keyCode === 27) {
+        document.removeEventListener("keydown", escListener);
+        _reject();
+      }
+    };
+    document.addEventListener("keydown", escListener);
+    //
+    modal.addEventListener("action:sign", () => {
       Promise.resolve(onSign()).then(resolve, reject);
+      modal.querySelectorAll<any>("[slot=footer]")
+        .forEach((e) => e.setAttribute("disabled", "disabled"));
     }, { once: true });
     window.document.body.appendChild(portal);
   }).then(
@@ -47,14 +62,8 @@ async function assertEthereumEnabledBrowser() {
   }
 }
 
-async function _<T extends () => Promise<R>, R>(fn: T) {
-  await registerComponents();
-  await assertEthereumEnabledBrowser();
-  return fn();
-}
-
 /**
- * @typedef {object} AllowToRunReturnnType
+ * @typedef {object} AllowToRunReturnType
  * @property {Session} session
  * @property {ReadPermission} readPermission
  * @property {ReadPermission[]} extraReadPermissions
@@ -74,7 +83,7 @@ async function _<T extends () => Promise<R>, R>(fn: T) {
  * @param {string} opts.nonce - Unique identifier for this data exchange
  * @param {string} opts.verifier - Address of the REY verifier that will
  *  supervise any transaction related with this session. See Session.verifier
- * @returns {AllowToRunReturnnType}
+ * @returns {AllowToRunReturnType}
  *
  * @see https://rey.readthedocs.io/en/latest/contents/reference/permissions.html#read-permission
  * @see https://rey.readthedocs.io/en/latest/contents/reference/transactions.html#session
@@ -82,40 +91,22 @@ async function _<T extends () => Promise<R>, R>(fn: T) {
 async function requestAllowToRunSignature(opts: {
   reader: string,
   source: string,
-  verifier: string,
-  expiration: number,
-  nonce: number|string,
+  verifier?: string,
+  expiration?: number,
+  nonce?: number|string,
 }) {
   await registerComponents();
   await assertEthereumEnabledBrowser();
-
-  const sourceApp = await App(opts.source);
-  const verifierApp = await App(opts.verifier);
-  const sourceAppManifestEntry = await sourceApp.manifestEntry();
-  const verifierManifest = await verifierApp.manifest();
-
-  const subject = await metamask.defaultAccount();
-  const { reader, source, verifier, expiration, nonce } = opts;
-  const manifest = sourceAppManifestEntry.hash;
-  const fee = verifierManifest.verifier_fee || 0;
-  const partialExtraReadPermissions = await sourceApp.extraReadPermissions();
-  const sign = DummySign();
-  const [_session, _readPermission, _extraReadPermissions] = await Promise.all([
-    Factory.buildSession({ subject, verifier, fee, nonce }, sign),
-    Factory.buildReadPermission({ reader, source, subject, expiration, manifest }, sign),
-    Promise.all(partialExtraReadPermissions.map((rp) =>
-      Factory.buildReadPermission({ ...rp, subject, expiration }, sign))),
+  const [_session, [_readPermission, ..._extraReadPermissions]] = await Promise.all([
+    buildUnsignedSession(opts),
+    buildUnsignedReadPermission(opts),
   ]);
-
   const modal = buildAllowToRunModal(_session, _readPermission,
     ..._extraReadPermissions);
   return handleModalActions(modal, async () => {
-    const metaSign = MetamaskSign();
-    const [session, readPermission, extraReadPermissions] = await Promise.all([
-      Factory.buildSession(_session, metaSign),
-      Factory.buildReadPermission(_readPermission, metaSign),
-      Promise.all(_extraReadPermissions.map((rp) =>
-        Factory.buildReadPermission({ ...rp, subject, expiration }, metaSign))),
+    const [session, [readPermission, extraReadPermissions]] = await Promise.all([
+      buildSignedSession(_session),
+      buildSignedReadPermission(_readPermission),
     ]);
     return { session, readPermission, extraReadPermissions };
   });
@@ -123,54 +114,33 @@ async function requestAllowToRunSignature(opts: {
 
 async function requestSelfRunSignature(opts: {
   source: string,
-  verifier: string,
-  fee: number | string,
-  nonce: number | string,
+  verifier?: string,
+  nonce?: number|string,
 }) {
   await registerComponents();
   await assertEthereumEnabledBrowser();
-
-  const sourceApp = await App(opts.source);
-  const sourceAppManifestEntry = await sourceApp.manifestEntry();
-
-  const subject = await metamask.defaultAccount();
-  const reader = subject;
-  const expiration = Math.floor(Date.now() / 1000) + 60 * 5;
-  const { source, verifier, fee, nonce } = opts;
-  const manifest = sourceAppManifestEntry.hash;
-  const value = 0; // FIXME: Where do we take this value from?
-  const partialExtraReadPermissions = await sourceApp.extraReadPermissions();
-  const sign = DummySign();
-  const [_session, _readPermission, _extraReadPermissions] = await Promise.all([
-    Factory.buildSession({ subject, verifier, fee, nonce }, sign),
-    Factory.buildReadPermission({ reader, source, subject, expiration, manifest }, sign),
-    Promise.all(partialExtraReadPermissions.map((rp) =>
-      Factory.buildReadPermission({ ...rp, subject, expiration }, sign))),
-  ]);
-  const _request = await Factory.buildRequest({
-    readPermission: _readPermission,
-    session: _session,
-    value,
-    counter: Date.now(),
-  }, sign);
-  const modal = buildSelfRunModal(_request, ..._extraReadPermissions);
+  const _appParams = await buildUnsignedAppParams(opts);
+  const modal = buildSelfRunModal(_appParams);
   return handleModalActions(modal, async () => {
-    const metaSign = MetamaskSign();
-    const appParams = await Factory.buildAppParams({
-      request: _request,
-      extraReadPermissions: _extraReadPermissions,
-    }, metaSign);
-    const loader = new ReyLoaderComponent();
-    loader.slot = "preface";
+    const appParams = await buildSignedAppParams(opts);
     modal.querySelector("[slot=preface]").remove();
+    (modal.querySelector("[slot=footer]") as HTMLElement).style.display = "none";
+    const loader = new ReyLoaderComponent("retrieving your data...");
+    loader.slot = "preface";
     modal.appendChild(loader);
-    const result = await sourceApp.query(appParams);
-    loader.remove();
-    const pre = document.createElement("pre");
-    pre.innerText = JSON.stringify(result, null, 2);
-    pre.slot = "preface";
-    loader.remove();
-    modal.appendChild(pre);
+    try {
+      const app = await App(opts.source);
+      const result = await app.query(appParams);
+      const pre = new ReyPreComponent(result);
+      pre.slot = "preface";
+      modal.appendChild(pre);
+    } catch (e) {
+      const pre = new ReyPreComponent(e);
+      pre.slot = "preface";
+      modal.appendChild(pre);
+    } finally {
+      loader.remove();
+    }
     return new Promise(() => null);
   });
 }
@@ -193,16 +163,11 @@ async function requestOptInSignature(opts: {
   await assertEthereumEnabledBrowser();
 
   const app = await App(opts.writer);
-  await app.manifest(); // Load the manifest so we ensure a valid app
-
-  const subject = await metamask.defaultAccount();
-  const writer = opts.writer;
-  const _writePermission = await Factory.buildWritePermission(
-    { subject, writer }, DummySign());
-
+  await app.manifest();
+  const _writePermission = await buildUnsignedWritePermission(opts);
   const modal = buildOptInModal(_writePermission);
   return handleModalActions(modal, () =>
-    Factory.buildWritePermission(_writePermission, MetamaskSign()));
+    buildSignedWritePermission(_writePermission));
 }
 
 export {

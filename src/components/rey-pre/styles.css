@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+pre {
+  line-height: initial;
+  word-break: break-all;
+  white-space: pre-wrap;
+  color: var(--accent-color);
+  text-align: left;
+  max-height: 240px;
+  overflow: scroll;
+}
+
+pre.error {
+  color: var(--error-color, red);
+}

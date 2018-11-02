@@ -1,4 +1,4 @@
-import { AppClickEvent, CloseModalEvent, SignModalEvent } from "../../shared/events";
+import { AppClickEvent, CloseModalEvent } from "../../shared/events";
 
 export default class ReyModalComponent extends HTMLElement {
   constructor() {
@@ -11,7 +11,7 @@ export default class ReyModalComponent extends HTMLElement {
 
     // Handle click events on app names on any child element
     this.addEventListener("app-click", (ev: AppClickEvent) => {
-      window.open(`https://explorer.reputation.network/app/${ev.appAddress}`);
+      window.open(`https://explorer.reputation.network/address/${ev.appAddress}`);
     });
 
     // Handle structs details clicks
@@ -30,7 +30,6 @@ export default class ReyModalComponent extends HTMLElement {
         this.dispatchEvent(new EventClazz());
       });
     };
-    handleBtnClick(shadowRoot.querySelector("#sign"), SignModalEvent);
     handleBtnClick(shadowRoot.querySelector("#close"), CloseModalEvent);
   }
 }

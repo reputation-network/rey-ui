@@ -5,6 +5,11 @@
   align-items: center;
 }
 
+:host-context([disabled]) {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
 button {
   border: none;
   outline: none;

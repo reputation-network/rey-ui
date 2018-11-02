@@ -1,8 +1,9 @@
 import { ReadPermission, Request, Session, WritePermission } from "rey-sdk/dist/structs";
-import { StructDetailsEvent } from "../../shared/events";
+import { EncryptionKey } from "rey-sdk/dist/utils";
 import ReyAppNameComponent from "../rey-app-name";
+import ReyPreComponent from "../rey-pre";
 
-type StructsWithLabel = ReadPermission | Request | Session | WritePermission;
+type StructsWithLabel = ReadPermission | Request | Session | WritePermission | EncryptionKey;
 
 export default class ReyStructLabelComponent extends HTMLElement {
   constructor(struct: StructsWithLabel) {
@@ -15,7 +16,8 @@ export default class ReyStructLabelComponent extends HTMLElement {
 
     const labelElem = shadow.querySelector("#label");
 
-    const preElem = createStructPre(struct);
+    const preElem = new ReyPreComponent(struct);
+    preElem.classList.add("hidden");
     shadow.appendChild(preElem);
 
     const detailsAnchor = createDetailsAnchorElement(struct);
@@ -39,6 +41,8 @@ export default class ReyStructLabelComponent extends HTMLElement {
       return require("./templates/write-permission.html");
     } else if (struct instanceof Request) {
       return require("./templates/request.html");
+    } else if (struct instanceof EncryptionKey) {
+      return require("./templates/encryption-key.html");
     }
   }
 
@@ -67,18 +71,4 @@ export function createDetailsAnchorElement(struct: StructsWithLabel) {
   detailsAnchor.href = "#";
   detailsAnchor.innerText = "[+]";
   return detailsAnchor;
-}
-
-export function createStructPre(struct: StructsWithLabel) {
-  const pre = document.createElement("pre");
-  pre.classList.add("hidden");
-  pre.innerHTML = json(struct);
-  return pre;
-}
-
-export function json(data: any): string {
-  const space = 2;
-  // Remove the signature field at the root
-  data = Object.assign({}, data, { signature: undefined });
-  return JSON.stringify(data, null, space);
 }

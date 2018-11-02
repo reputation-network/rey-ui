@@ -80,7 +80,8 @@
     }
 
     function openPrompt(formSelector, promptFn) {
-      return async () => {
+      return async (ev) => {
+        ev.target.disabled = true;
         try {
           const data = await promptFn(fields(formSelector));
           pre.innerHTML = JSON.stringify(data, null, 2);
@@ -89,6 +90,8 @@
           console.error(e);
           pre.innerHTML = JSON.stringify(e.message, null, 2);
           pre.style.color = "red";
+        } finally {
+          ev.target.disabled = false;
         }
       };
     }

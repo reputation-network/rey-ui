@@ -38,7 +38,7 @@ async function accounts() {
   return accs;
 }
 
-async function defaultAccount() {
+async function defaultAccount(): Promise<string> {
   const accs = await accounts();
   return accs[0] || null;
 }

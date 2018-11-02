@@ -1,8 +1,9 @@
+import { setAttributes } from "../../shared/dom-utils";
 import ReyAppNameComponent from "../rey-app-name";
 
 export default function ReyPreface(template: string) {
   return class extends HTMLElement {
-    constructor() {
+    constructor(attributes?: Record<string, string>) {
       super();
       const shadow = this.attachShadow({ mode: "open" });
       shadow.innerHTML = template;
@@ -16,6 +17,7 @@ export default function ReyPreface(template: string) {
         const detailsEvent = new Event("preface-details", { bubbles: true });
         this.dispatchEvent(detailsEvent);
       });
+      setAttributes(this, attributes);
     }
 
     public static get observedAttributes() {
