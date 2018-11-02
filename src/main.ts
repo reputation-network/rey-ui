@@ -17,6 +17,21 @@ import {
 
 async function handleModalActions<T>(modal: HTMLElement, onSign: () => Promise<T>): Promise<T> {
   const portal = ReyPortalComponent.wrap(modal);
+  const addPortal = (p: HTMLElement) => {
+    window.document.body.style.overflow = "hidden";
+    window.document.body.appendChild(p);
+  };
+  const removePortal = (isErrorHandler: boolean) => {
+    return (resultOrError: T|Error) => {
+      portal.remove();
+      window.document.body.style.overflow = "scroll";
+      if (isErrorHandler) {
+        return resultOrError as T;
+      } else {
+        throw resultOrError as Error;
+      }
+    };
+  };
   return new Promise<T>((resolve, reject) => {
     const _reject = () => reject(new Error("User rejected signature"));
     portal.addEventListener("close", _reject);
@@ -35,11 +50,8 @@ async function handleModalActions<T>(modal: HTMLElement, onSign: () => Promise<T
       modal.querySelectorAll<any>("[slot=footer]")
         .forEach((e) => e.setAttribute("disabled", "disabled"));
     }, { once: true });
-    window.document.body.appendChild(portal);
-  }).then(
-    (result) => { portal.remove(); return result; },
-    (err) => { portal.remove(); throw err; },
-  );
+    addPortal(portal);
+  }).then(removePortal(false), removePortal(true));
 }
 
 async function showError(error: Error): Promise<never> {
