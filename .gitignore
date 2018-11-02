@@ -19,4 +19,4 @@ package-lock.json
 
 # Output files
 #
-dist/index.html
+dist/
