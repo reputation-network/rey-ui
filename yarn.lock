@@ -2,21 +2,6 @@
 # yarn lockfile v1
 
 
-"@types/bn.js@*":
-  version "4.11.2"
-  resolved "https://registry.yarnpkg.com/@types/bn.js/-/bn.js-4.11.2.tgz#3179b977b9d18aa81f256cae7556282ee99fd1cc"
-  integrity sha512-OC3E/26kp/+JSOE4eJo86KivQM95MKPgnkug3uSCt+pXTWPovVBhixL1GwK1MLLsxgR3uZmTGjQQd8uKJEnurA==
-  dependencies:
-    "@types/node" "*"
-
-"@types/ethereumjs-util@^5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@types/ethereumjs-util/-/ethereumjs-util-5.2.0.tgz#f49fe8114789ec0871721392c09318c3eb56671b"
-  integrity sha512-qwQgQqXXTRv2h2AlJef+tMEszLFkCB9dWnrJYIdAwqjubERXEc/geB+S3apRw0yQyTVnsBf8r6BhlrE8vx+3WQ==
-  dependencies:
-    "@types/bn.js" "*"
-    "@types/node" "*"
-
 "@types/node-rsa@^0.4.3":
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/@types/node-rsa/-/node-rsa-0.4.3.tgz#7e87b819f654780445dffabb49d4ad7e8d2eec36"
@@ -28,28 +13,6 @@
   version "10.10.3"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.10.3.tgz#09c75a4ad84d6a3d286790bdd9489a4f8ee9906c"
   integrity sha512-dWk7F3b0m6uDLHero7tsnpAi9r2RGPQHGbb0/VCv7DPJRMFtk3RonY1/29vfJKnheRMBa7+uF+vunlg/mBGlxg==
-
-"@types/tapable@*":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.4.tgz#b4ffc7dc97b498c969b360a41eee247f82616370"
-  integrity sha512-78AdXtlhpCHT0K3EytMpn4JNxaf5tbqbLcbIRoQIHzpTIyjpxLQKRoxU55ujBXAtg3Nl2h/XWvfDa9dsMOd0pQ==
-
-"@types/uglify-js@*":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/uglify-js/-/uglify-js-3.0.3.tgz#801a5ca1dc642861f47c46d14b700ed2d610840b"
-  integrity sha512-MAT0BW2ruO0LhQKjvlipLGCF/Yx0y/cj+tT67tK3QIQDrM2+9R78HgJ54VlrE8AbfjYJJBCQCEPM5ZblPVTuww==
-  dependencies:
-    source-map "^0.6.1"
-
-"@types/webpack@^4.4.9":
-  version "4.4.12"
-  resolved "https://registry.yarnpkg.com/@types/webpack/-/webpack-4.4.12.tgz#79094b4c51ab1cf8f41f55bfe270c150bf0c0528"
-  integrity sha512-qCBVNh3EODnbZVHLqqjBlxIJ9qo9JxhcT2iRe4cQEGWahe4fd56VVmcGQKjE2dUgSsFRCxAZhUKLtec2B06r2g==
-  dependencies:
-    "@types/node" "*"
-    "@types/tapable" "*"
-    "@types/uglify-js" "*"
-    source-map "^0.6.0"
 
 "@webassemblyjs/ast@1.7.6":
   version "1.7.6"
@@ -4093,26 +4056,25 @@ ret@~0.1.10:
   resolved "https://registry.yarnpkg.com/ret/-/ret-0.1.15.tgz#b8a4825d5bdb1fc3f6f53c2bc33f81388681c7bc"
   integrity sha512-TTlYpa+OL+vMMNG24xSlQGEJ3B/RzEfUlLct7b5G/ytav+wPrplCpVMFuwzXbkecJrb6IYo1iFb0S9v37754mg==
 
-rey-sdk@reputation-network/rey-sdk-js#0.1.0-alpha.19:
-  version "0.1.0-alpha.19"
-  resolved "https://codeload.github.com/reputation-network/rey-sdk-js/tar.gz/099d886740000a30ec367ffce5c45d961194a723"
+rey-sdk@reputation-network/rey-sdk-js:
+  version "0.1.0-alpha.29"
+  resolved "https://codeload.github.com/reputation-network/rey-sdk-js/tar.gz/2b89711e60565a8225b08e80d8b51e97141cd252"
   dependencies:
-    "@types/ethereumjs-util" "^5.2.0"
-    "@types/webpack" "^4.4.9"
+    "@types/node-rsa" "^0.4.3"
     axios "^0.18.0"
+    node-rsa "^1.0.1"
     safe-buffer "^5.1.2"
     web3-eth-accounts "^1.0.0-beta.36"
     web3-eth-contract "^1.0.0-beta.36"
     web3-eth-personal "^1.0.0-beta.36"
     web3-utils "^1.0.0-beta.36"
+    yarn "^1.10.1"
 
-rey-sdk@reputation-network/rey-sdk-js#0.1.0-alpha.24:
-  version "0.1.0-alpha.24"
-  resolved "https://codeload.github.com/reputation-network/rey-sdk-js/tar.gz/6c442eae6e4c6c425f31463f2722e43096edcbd4"
+rey-sdk@reputation-network/rey-sdk-js#0.1.0-alpha.27:
+  version "0.1.0-alpha.27"
+  resolved "https://codeload.github.com/reputation-network/rey-sdk-js/tar.gz/a2019408051a6c7c9c492e56c3d4f2d43e27263a"
   dependencies:
-    "@types/ethereumjs-util" "^5.2.0"
     "@types/node-rsa" "^0.4.3"
-    "@types/webpack" "^4.4.9"
     axios "^0.18.0"
     node-rsa "^1.0.1"
     safe-buffer "^5.1.2"
