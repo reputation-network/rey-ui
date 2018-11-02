@@ -137,8 +137,7 @@ async function requestSelfRunSignature(opts: { source: string }) {
     } finally {
       loader.remove();
     }
-    return new Promise(() => null);
-  });
+  }).then(() => undefined, () => undefined);
 }
 
 /**
