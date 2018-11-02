@@ -88,7 +88,7 @@ async function assertEthereumEnabledBrowser() {
  * @see https://rey.readthedocs.io/en/latest/contents/reference/permissions.html#read-permission
  * @see https://rey.readthedocs.io/en/latest/contents/reference/transactions.html#session
  */
-async function requestAllowToRunSignature(opts: {
+async function requestAllowToRunPermissions(opts: {
   reader: string,
   source: string,
   verifier?: string,
@@ -112,7 +112,30 @@ async function requestAllowToRunSignature(opts: {
   });
 }
 
-async function requestSelfRunSignature(opts: { source: string }) {
+/**
+ * Presents the user with an "opt-in" kind of modal for the provided
+ * options. This function returns a promise that is resolved once the user
+ * has been informed about what is about to sign and has signed each message.
+ *
+ * @param {string} opts.reader - Address of who is going to share the user's
+ *  info via REY protocol. This is typically your address.
+ * @returns {WritePermission}
+ *
+ * @see https://rey.readthedocs.io/en/latest/contents/reference/permissions.html#write-permission
+ */
+async function requestWritePermission(opts: { writer: string }) {
+  await registerComponents();
+  await assertEthereumEnabledBrowser();
+
+  const app = await App(opts.writer);
+  await app.manifest();
+  const _writePermission = await buildUnsignedWritePermission(opts);
+  const modal = buildOptInModal(_writePermission);
+  return handleModalActions(modal, () =>
+    buildSignedWritePermission(_writePermission));
+}
+
+async function openSelfRunPrompt(opts: { source: string }) {
   await registerComponents();
   await assertEthereumEnabledBrowser();
   const _appParams = await buildUnsignedAppParams(opts);
@@ -140,33 +163,8 @@ async function requestSelfRunSignature(opts: { source: string }) {
   }).then(() => undefined, () => undefined);
 }
 
-/**
- * Presents the user with an "opt-in" kind of modal for the provided
- * options. This function returns a promise that is resolved once the user
- * has been informed about what is about to sign and has signed each message.
- *
- * @param {string} opts.reader - Address of who is going to share the user's
- *  info via REY protocol. This is typically your address.
- * @returns {WritePermission}
- *
- * @see https://rey.readthedocs.io/en/latest/contents/reference/permissions.html#write-permission
- */
-async function requestOptInSignature(opts: {
-  writer: string,
-}) {
-  await registerComponents();
-  await assertEthereumEnabledBrowser();
-
-  const app = await App(opts.writer);
-  await app.manifest();
-  const _writePermission = await buildUnsignedWritePermission(opts);
-  const modal = buildOptInModal(_writePermission);
-  return handleModalActions(modal, () =>
-    buildSignedWritePermission(_writePermission));
-}
-
 export {
-  requestAllowToRunSignature,
-  requestSelfRunSignature,
-  requestOptInSignature,
+  openSelfRunPrompt,
+  requestAllowToRunPermissions,
+  requestWritePermission,
 };
