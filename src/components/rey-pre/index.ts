@@ -17,6 +17,6 @@ export default class ReyPreComponent extends HTMLElement {
 export function json(data: any, omitSignature: boolean = true): string {
   const space = 2;
   const replacer = (key: string, value: any) =>
-    omitSignature && key === "signature" ? undefined : value;
-  return JSON.stringify(data, replacer, space);
+    key === "signature" ? undefined : value;
+  return JSON.stringify(data, omitSignature ? replacer : null, space);
 }

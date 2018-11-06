@@ -45,7 +45,7 @@ function buildOptInModal(writePermission: WritePermission) {
   const writer = writePermission.writer;
   return buildModal({
     header: () => new ReyAppHeaderComponent(writer),
-    preface: () => new ReyPrefaceOptIn({ writer }),
+    preface: () => new ReyPrefaceOptIn({ writer, "message-count": "1" }),
     labels: () => [new ReyStructLabelComponent(writePermission)],
     footer: () => buildSignButton(),
   });

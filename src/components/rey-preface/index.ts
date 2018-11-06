@@ -25,15 +25,28 @@ export default function ReyPreface(template: string) {
     }
 
     public attributeChangedCallback(name, oldValue, newValue) {
-      if (["cost", "message-count"].indexOf(name) >= 0) {
-        const elem: HTMLSpanElement = this.shadowRoot
-          .querySelector(`#${name}`);
-        if (elem) { elem.innerText = `${newValue}`; }
-      } else if (newValue && oldValue !== newValue) {
+      if (!newValue || oldValue === newValue) {
+        return;
+      }
+
+      if (["reader", "source", "verifier", "writer"].indexOf(name) >= 0) {
         const elems = this.shadowRoot
           .querySelectorAll<ReyAppNameComponent>(`rey-app-name.${name}`);
         elems.forEach((e) => e.setAttribute("address", newValue));
+      } else {
+        this._setChildrenInnerHtml(`#${name}`, newValue);
+        if (name === "message-count") {
+          this.shadowRoot.querySelectorAll(`.message-count-suffix`).forEach((s) => {
+            s.innerHTML = newValue === "1" ? "message" : "messages";
+          });
+        }
       }
+    }
+
+    private _setChildrenInnerHtml(selector: string, innerHTML: string) {
+      this.shadowRoot.querySelectorAll(selector).forEach((e) => {
+        e.innerHTML = `${innerHTML}`;
+      });
     }
   };
 }
