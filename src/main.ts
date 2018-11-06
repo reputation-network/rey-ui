@@ -21,23 +21,20 @@ async function handleModalActions<T>(modal: HTMLElement, onSign: () => Promise<T
     window.document.body.style.overflow = "hidden";
     window.document.body.appendChild(p);
   };
-  const removePortal = (isErrorHandler: boolean) => {
-    return (resultOrError: T|Error) => {
-      portal.remove();
-      window.document.body.style.overflow = "scroll";
-      if (isErrorHandler) {
-        return resultOrError as T;
-      } else {
-        throw resultOrError as Error;
-      }
-    };
+  const removePortalAndForward = (result: T) => {
+    portal.remove();
+    return result;
+  };
+  const removePortalAndThrow = (error: any) => {
+    portal.remove();
+    throw error;
   };
   return new Promise<T>((resolve, reject) => {
     const _reject = () => reject(new Error("User rejected signature"));
     portal.addEventListener("close", _reject);
     modal.addEventListener("close", _reject);
     // Allow escape to be used to close the modal
-    const escListener = (ev) => {
+    const escListener = (ev: KeyboardEvent) => {
       if (ev.keyCode === 27) {
         document.removeEventListener("keydown", escListener);
         _reject();
@@ -46,17 +43,18 @@ async function handleModalActions<T>(modal: HTMLElement, onSign: () => Promise<T
     document.addEventListener("keydown", escListener);
     //
     modal.addEventListener("action:sign", () => {
-      Promise.resolve(onSign()).then(resolve, reject);
       modal.querySelectorAll<any>("[slot=footer]")
         .forEach((e) => e.setAttribute("disabled", "disabled"));
+      Promise.resolve(onSign()).then(resolve, reject);
     }, { once: true });
     addPortal(portal);
-  }).then(removePortal(false), removePortal(true));
+  }).then(removePortalAndForward, removePortalAndThrow);
 }
 
 async function showError(error: Error): Promise<never> {
   const modal = buildErrorModal(error);
-  return handleModalActions<never>(modal, () => null);
+  return handleModalActions<never>(modal, () => null)
+    .catch(() => Promise.reject(error));
 }
 
 async function assertEthereumEnabledBrowser() {
