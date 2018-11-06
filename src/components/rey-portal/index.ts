@@ -12,23 +12,24 @@ export default class ReyPortalComponent extends HTMLElement {
     const style = document.createElement("style");
     style.textContent = require("./styles.css");
     shadowRoot.appendChild(style);
-
+    elem.classList.add("content");
     shadowRoot.appendChild(elem);
     elem.addEventListener("click", (ev) => ev.stopPropagation());
     this.addEventListener("click", () =>
       this.dispatchEvent(new CloseModalEvent()));
 
-    elem.classList.add("enter-animation");
-    elem.addEventListener("animationend", () => {
-      elem.classList.remove("enter-animation");
+    this.classList.add("entering");
+    this.addEventListener("animationend", () => {
+      this.classList.remove("entering");
     });
 
     // Override the remove action so we can animate the child before actually
     // being removed from the DOM
     this.remove = () => {
       return new Promise<void>((resolve) => {
-        elem.classList.add("leave-animation");
-        elem.addEventListener("animationend", () => {
+        this.classList.add("leaving");
+        this.addEventListener("animationend", () => {
+          this.classList.remove("leaving");
           super.remove();
           resolve();
         });
