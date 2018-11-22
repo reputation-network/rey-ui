@@ -11,6 +11,10 @@ export default class ReyPreComponent extends HTMLElement {
     if (obj instanceof Error) {
       pre.classList.add("error");
     }
+    if (obj && obj.response && obj.response.status === 404) {
+      // FIXME: THIS IS AWFUL!
+      pre.innerHTML = "No data found.";
+    }
   }
 }
 

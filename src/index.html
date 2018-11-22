@@ -98,11 +98,11 @@
 
     const pre = document.querySelector("pre");
     document.querySelector("#open-allow-to-run-prompt")
-      .addEventListener("click", openPrompt("#allow-to-run", REY.ui.requestAllowToRunPermissions));
+      .addEventListener("click", openPrompt("#allow-to-run", REY.ui("test").requestAllowToRunPermissions));
     document.querySelector("#open-opt-in-prompt")
-      .addEventListener("click", openPrompt("#opt-in", REY.ui.requestWritePermission));
+      .addEventListener("click", openPrompt("#opt-in", REY.ui("test").requestWritePermission));
     document.querySelector("#open-self-run-prompt")
-      .addEventListener("click", openPrompt("#self-run", REY.ui.openSelfRunPrompt));
+      .addEventListener("click", openPrompt("#self-run", REY.ui("test").openSelfRunPrompt));
   </script>
 </body>
 </html>

@@ -1,54 +1,22 @@
-import registerComponents, { ReyLoaderComponent, ReyPortalComponent, ReyPreComponent } from "./components";
-import { buildAllowToRunModal, buildErrorModal, buildOptInModal, buildSelfRunModal } from "./modals";
-import App from "./shared/app";
-import { MissingEthProviderAccountError, MissingEthProviderError, UnsupportedEthNetworkError } from "./shared/errors";
-import EthereumNetwork from "./shared/ethereum-networks";
-import * as metamask from "./shared/metamask";
+import registerComponents, { ReyLoaderComponent, ReyPreComponent } from "./components";
+import * as metamaskAddon from "./lib/metamask-addon";
+import createReySdk from "./lib/rey-sdk";
+import createReySdkHelpers from "./lib/rey-sdk-helpers";
 import {
-  buildSignedAppParams,
-  buildSignedReadPermission,
-  buildSignedSession,
-  buildSignedWritePermission,
-  buildUnsignedAppParams,
-  buildUnsignedReadPermission,
-  buildUnsignedSession,
-  buildUnsignedWritePermission,
-} from "./shared/struct-helpers";
+  buildAllowToRunModal, buildErrorModal, buildOptInModal,
+  buildSelfRunModal, handleModalActions,
+} from "./modals";
+import createConfig, { Config } from "./shared/config";
+import { MissingEthProviderAccountError, MissingEthProviderError, UnsupportedEthNetworkError } from "./shared/errors";
 
-async function handleModalActions<T>(modal: HTMLElement, onSign: () => Promise<T>): Promise<T> {
-  const portal = ReyPortalComponent.wrap(modal);
-  const addPortal = (p: HTMLElement) => {
-    window.document.body.style.overflow = "hidden";
-    window.document.body.appendChild(p);
-  };
-  const removePortalAndForward = (result: T) => {
-    portal.remove();
-    return result;
-  };
-  const removePortalAndThrow = (error: any) => {
-    portal.remove();
-    throw error;
-  };
-  return new Promise<T>((resolve, reject) => {
-    const _reject = () => reject(new Error("User rejected signature"));
-    portal.addEventListener("close", _reject);
-    modal.addEventListener("close", _reject);
-    // Allow escape to be used to close the modal
-    const escListener = (ev: KeyboardEvent) => {
-      if (ev.keyCode === 27) {
-        document.removeEventListener("keydown", escListener);
-        _reject();
-      }
-    };
-    document.addEventListener("keydown", escListener);
-    //
-    modal.addEventListener("action:sign", () => {
-      modal.querySelectorAll<any>("[slot=footer]")
-        .forEach((e) => e.setAttribute("disabled", "disabled"));
-      Promise.resolve(onSign()).then(resolve, reject);
-    }, { once: true });
-    addPortal(portal);
-  }).then(removePortalAndForward, removePortalAndThrow);
+async function createReySdkWithHelpers(config: Config) {
+  const sdk = createReySdk({
+    ethereumProvider: await metamaskAddon.ethereumProvider(),
+    registryContractAddress: config.registryContractAddress,
+    reyContractAddress: config.reyContractAddress,
+  });
+  const helpers = createReySdkHelpers({sdk});
+  return {...sdk, ...helpers};
 }
 
 async function showError(error: Error): Promise<never> {
@@ -57,127 +25,134 @@ async function showError(error: Error): Promise<never> {
     .catch(() => Promise.reject(error));
 }
 
-async function assertEthereumEnabledBrowser() {
-  const provider = await metamask.ethereumProvider();
+async function assertEthereumEnabledBrowser(config: Config) {
+  const provider = await metamaskAddon.ethereumProvider();
   if (!provider) {
     await showError(new MissingEthProviderError());
   }
-  const netId = await metamask.getNetwork();
-  if (netId !== EthereumNetwork.RINKEBY) {
+  const netId = await metamaskAddon.getNetwork();
+  if (netId !== config.chainId) {
     await showError(new UnsupportedEthNetworkError());
   }
-  const account = await metamask.defaultAccount();
+  const account = await metamaskAddon.defaultAccount();
   if (!account) {
     await showError(new MissingEthProviderAccountError());
   }
 }
 
-/**
- * @typedef {object} AllowToRunReturnType
- * @property {Session} session
- * @property {ReadPermission} readPermission
- * @property {ReadPermission[]} extraReadPermissions
- */
+function createReyUi(_config: Partial<Config>) {
+  const config = createConfig(_config);
+  const _rey = createReySdkWithHelpers(config);
+  return {
+    /**
+     * Presents the user with an "opt-in" kind of modal for the provided
+     * options. This function returns a promise that is resolved once the user
+     * has been informed about what is about to sign and has signed each message.
+     *
+     * @param {string} writer - Address of who is going to share the user's
+     *  info via REY protocol. This is typically your address.
+     * @returns {WritePermission}
+     *
+     * @see https://rey.readthedocs.io/en/latest/contents/reference/permissions.html#write-permission
+     */
+    async requestWritePermission(writePermissionOpts: { writer: string }) {
+      await registerComponents();
+      await assertEthereumEnabledBrowser(config);
+      const rey = await _rey;
+      await rey.getAppManifest(writePermissionOpts.writer);
+      const _writePermission = await rey.buildUnsignedWritePermission(writePermissionOpts);
+      const modal = buildOptInModal(_writePermission);
+      return handleModalActions(modal, () =>
+        rey.buildSignedWritePermission(_writePermission));
+    },
+    /**
+     * Presents the user with an "allow-to-run" kind of modal for the provided
+     * options. This function returns a promise that is resolved once the user
+     * has been informed about what is about to sign and has signed each message.
+     *
+     * @param {string} opts.reader - Address of who is going to read the
+     *  information about the user. This is typically your address.
+     * @param {string} opts.source - Address of what REY app reader is requesting
+     *  access to.
+     * @param {number} opts.expiration - Unix Timestamp of when the user permission
+     *  expires (in seconds!).
+     * @param {string} opts.nonce - Unique identifier for this data exchange
+     * @param {string} opts.verifier - Address of the REY verifier that will
+     *  supervise any transaction related with this session. See Session.verifier
+     * @returns {AllowToRunReturnType}
+     *
+     * @see https://rey.readthedocs.io/en/latest/contents/reference/permissions.html#read-permission
+     * @see https://rey.readthedocs.io/en/latest/contents/reference/transactions.html#session
+     */
+    async requestAllowToRunPermissions(readPermissionOpts: {
+      reader: string,
+      source: string,
+      verifier?: string,
+      expiration?: number,
+      nonce?: number | string,
+    }) {
+      await registerComponents();
+      await assertEthereumEnabledBrowser(config);
+      const rey = await _rey;
+      await rey.getAppManifest(readPermissionOpts.source);
 
-/**
- * Presents the user with an "allow-to-run" kind of modal for the provided
- * options. This function returns a promise that is resolved once the user
- * has been informed about what is about to sign and has signed each message.
- *
- * @param {string} opts.reader - Address of who is going to read the
- *  information about the user. This is typically your address.
- * @param {string} opts.source - Address of what REY app reader is requesting
- *  access to.
- * @param {number} opts.expiration - Unix Timestamp of when the user permission
- *  expires (in seconds!).
- * @param {string} opts.nonce - Unique identifier for this data exchange
- * @param {string} opts.verifier - Address of the REY verifier that will
- *  supervise any transaction related with this session. See Session.verifier
- * @returns {AllowToRunReturnType}
- *
- * @see https://rey.readthedocs.io/en/latest/contents/reference/permissions.html#read-permission
- * @see https://rey.readthedocs.io/en/latest/contents/reference/transactions.html#session
- */
-async function requestAllowToRunPermissions(opts: {
-  reader: string,
-  source: string,
-  verifier?: string,
-  expiration?: number,
-  nonce?: number|string,
-}) {
-  await registerComponents();
-  await assertEthereumEnabledBrowser();
-  const [_session, [_readPermission, ..._extraReadPermissions]] = await Promise.all([
-    buildUnsignedSession(opts),
-    buildUnsignedReadPermission(opts),
-  ]);
-  const modal = buildAllowToRunModal(_session, _readPermission,
-    ..._extraReadPermissions);
-  return handleModalActions(modal, async () => {
-    const [session, [readPermission, extraReadPermissions]] = await Promise.all([
-      buildSignedSession(_session),
-      buildSignedReadPermission(_readPermission),
-    ]);
-    return { session, readPermission, extraReadPermissions };
-  });
+      const [_session, [_readPermission, ..._extraReadPermissions]] = await Promise.all([
+        rey.buildUnsignedSession(readPermissionOpts),
+        rey.buildUnsignedReadPermission(readPermissionOpts),
+      ]);
+      const modal = buildAllowToRunModal(_session, _readPermission, ..._extraReadPermissions);
+      return handleModalActions(modal, async () => {
+        const [session, [readPermission, extraReadPermissions]] = await Promise.all([
+          rey.buildSignedSession(_session),
+          rey.buildSignedReadPermission(_readPermission),
+        ]);
+        return { session, readPermission, extraReadPermissions };
+      });
+    },
+    /**
+     * TODO: :(
+     * @param appAddress Address of the app to self-query
+     */
+    async openSelfRunPrompt(appParamsOpts: { source: string }) {
+      await registerComponents();
+      await assertEthereumEnabledBrowser(config);
+      const appAddress = appParamsOpts.source;
+      const rey = await _rey;
+      const _appParams = await rey.buildUnsignedAppParams({ source: appAddress });
+      const modal = buildSelfRunModal(_appParams);
+      const modalActionHandler = async () => {
+        const appParams = await rey.buildSignedAppParams({ source: appAddress });
+        modal.querySelector("[slot=preface]").remove();
+        (modal.querySelector("[slot=footer]") as HTMLElement).style.display = "none";
+        const loader = new ReyLoaderComponent("retrieving your data...");
+        loader.slot = "preface";
+        modal.appendChild(loader);
+        try {
+          const result = await rey.queryApp(appAddress, appParams);
+          const pre = new ReyPreComponent(result);
+          pre.slot = "preface";
+          modal.appendChild(pre);
+        } catch (e) {
+          const pre = new ReyPreComponent(e);
+          pre.slot = "preface";
+          modal.appendChild(pre);
+        } finally {
+          loader.remove();
+        }
+        // Return a promise that never completes, so the modal stays open
+        // until closed, which is treated as a thrown error
+        return new Promise(() => undefined);
+      };
+      try {
+        await handleModalActions(modal, modalActionHandler);
+      } catch (e) {
+        console.warn(e);
+        // Do nothing with the error, since it is "expected"
+      }
+      return undefined;
+    },
+  };
 }
 
-/**
- * Presents the user with an "opt-in" kind of modal for the provided
- * options. This function returns a promise that is resolved once the user
- * has been informed about what is about to sign and has signed each message.
- *
- * @param {string} opts.reader - Address of who is going to share the user's
- *  info via REY protocol. This is typically your address.
- * @returns {WritePermission}
- *
- * @see https://rey.readthedocs.io/en/latest/contents/reference/permissions.html#write-permission
- */
-async function requestWritePermission(opts: { writer: string }) {
-  await registerComponents();
-  await assertEthereumEnabledBrowser();
-
-  const app = await App(opts.writer);
-  await app.manifest();
-  const _writePermission = await buildUnsignedWritePermission(opts);
-  const modal = buildOptInModal(_writePermission);
-  return handleModalActions(modal, () =>
-    buildSignedWritePermission(_writePermission));
-}
-
-async function openSelfRunPrompt(opts: { source: string }) {
-  await registerComponents();
-  await assertEthereumEnabledBrowser();
-  const _appParams = await buildUnsignedAppParams(opts);
-  const modal = buildSelfRunModal(_appParams);
-  return handleModalActions(modal, async () => {
-    const appParams = await buildSignedAppParams(opts);
-    modal.querySelector("[slot=preface]").remove();
-    (modal.querySelector("[slot=footer]") as HTMLElement).style.display = "none";
-    const loader = new ReyLoaderComponent("retrieving your data...");
-    loader.slot = "preface";
-    modal.appendChild(loader);
-    try {
-      const app = await App(opts.source);
-      const result = await app.query(appParams);
-      const pre = new ReyPreComponent(result);
-      pre.slot = "preface";
-      modal.appendChild(pre);
-    } catch (e) {
-      const pre = new ReyPreComponent(e);
-      pre.slot = "preface";
-      modal.appendChild(pre);
-    } finally {
-      loader.remove();
-    }
-    // Return a promise that never completes, so the modal stays open
-    // until closed, which is treated as a thrown error
-    return new Promise(() => undefined);
-  }).then(() => undefined, () => undefined);
-}
-
-export {
-  openSelfRunPrompt,
-  requestAllowToRunPermissions,
-  requestWritePermission,
-};
+// Don't use export default since it breaks webpack umd behavior
+module.exports = createReyUi;

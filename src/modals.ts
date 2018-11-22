@@ -4,6 +4,7 @@ import {
   ReyCtaButtonComponent,
   ReyErrorComponent,
   ReyModalComponent,
+  ReyPortalComponent,
   ReyPrefaceAllowToRun,
   ReyPrefaceOptIn,
   ReyPrefaceSelfRun,
@@ -101,9 +102,49 @@ function buildErrorModal(error: Error) {
   });
 }
 
+async function handleModalActions<T>(
+  modal: HTMLElement,
+  onSign: () => Promise<T>,
+): Promise<T> {
+  const portal = ReyPortalComponent.wrap(modal);
+  const addPortal = (p: HTMLElement) => {
+    window.document.body.style.overflow = "hidden";
+    window.document.body.appendChild(p);
+  };
+  const removePortalAndForward = (result: T) => {
+    portal.remove();
+    return result;
+  };
+  const removePortalAndThrow = (error: any) => {
+    portal.remove();
+    throw error;
+  };
+  return new Promise<T>((resolve, reject) => {
+    const _reject = () => reject(new Error("User rejected signature"));
+    portal.addEventListener("close", _reject);
+    modal.addEventListener("close", _reject);
+    // Allow escape to be used to close the modal
+    const escListener = (ev: KeyboardEvent) => {
+      if (ev.keyCode === 27) {
+        document.removeEventListener("keydown", escListener);
+        _reject();
+      }
+    };
+    document.addEventListener("keydown", escListener);
+    //
+    modal.addEventListener("action:sign", () => {
+      modal.querySelectorAll<any>("[slot=footer]")
+        .forEach((e) => e.setAttribute("disabled", "disabled"));
+      Promise.resolve(onSign()).then(resolve, reject);
+    }, { once: true });
+    addPortal(portal);
+  }).then(removePortalAndForward, removePortalAndThrow);
+}
+
 export {
   buildAllowToRunModal,
   buildSelfRunModal,
   buildOptInModal,
   buildErrorModal,
+  handleModalActions,
 };

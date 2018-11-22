@@ -1,5 +1,5 @@
+import manifestCache from "../../lib/rey-manifest-cache";
 import { AppClickEvent } from "../../shared/events";
-import manifestCache from "../../shared/manifest-cache";
 import ReyAppNameComponent from "../rey-app-name";
 
 export default class ReyAppHeaderComponent extends HTMLElement {
