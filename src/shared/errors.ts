@@ -1,3 +1,5 @@
+import EthereumNetwork from "../lib/ethereum-networks";
+
 // tslint:disable:max-classes-per-file
 
 export class MissingEthProviderError extends Error {
@@ -7,8 +9,11 @@ export class MissingEthProviderError extends Error {
 }
 
 export class UnsupportedEthNetworkError extends Error {
-  constructor() {
+  constructor(public readonly supportedNetwork: string) {
     super("Unsupported ethereum network selected by the ethereum provider");
+    const netName = Object.keys(EthereumNetwork)
+      .find((k) => EthereumNetwork[k] === supportedNetwork);
+    this.supportedNetwork = netName || supportedNetwork;
   }
 }
 

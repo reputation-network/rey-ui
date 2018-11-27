@@ -113,7 +113,41 @@ function createReySdkHelpers(config: ReySdkHelpersConfig) {
     buildUnsignedAppParams: unsigned(helpers.buildAppParams),
     buildSignedAppParams: signed(helpers.buildAppParams),
   };
-  return {...helpers, ...signHelpers};
+  const renderHelpers = {
+    async failsafeGetManifest(address: string) {
+      try {
+        return config.sdk.getAppManifest(address);
+      } catch (e) {
+        return null;
+      }
+    },
+
+    async buildAppRenderData(address: string): Promise<AppRenderData|null> {
+      const manifest = await renderHelpers.failsafeGetManifest(address);
+      return manifest === null ? null : {
+        address: manifest.address,
+        name: manifest.name,
+        description: manifest.description,
+        iconUrl: manifest.picture_url,
+      };
+    },
+
+    async buildAppRenderDataRecord(...addresses: string[]) {
+      const renderDatas = await Promise.all(addresses.map(renderHelpers.buildAppRenderData));
+      return renderDatas.reduce<AppRenderDataRecord>((record, renderData) => {
+        if (renderData) {
+          record[renderData.address.toLowerCase()] = renderData;
+        }
+        return record;
+      }, {});
+    },
+  };
+
+  return {
+    ...helpers,
+    ...signHelpers,
+    ...renderHelpers,
+  };
 }
 
 type StructBuilder<P, R> = (opts: P, sign: SignStrategy) => Promise<R>;
@@ -153,5 +187,14 @@ IRequestOpts &
 ISessionOpts &
 Pick<IReadPermissionOpts, Exclude<keyof IReadPermissionOpts, "reader">> &
 { encryptionKey?: EncryptionKey };
+
+interface AppRenderData {
+  name: string;
+  address: string;
+  description: string;
+  iconUrl: string;
+}
+
+export type AppRenderDataRecord = Record<string, AppRenderData>;
 
 export default createReySdkHelpers;

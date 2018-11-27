@@ -10,46 +10,48 @@ $ yarn add reputation-network/rey-sdk-js reputation-network/rey-ui
 ```
 
 ```es6
-import { App, Factory } from "rey-sdk";
-import { requestAllowToRunSignature, requestOptInSignature } from "rey-ui";
+import createReyUi from "rey-ui";
 
-async function requestAccessToApp() {
-  // Create a client for reading the app
-  const app = new App("0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-  // Prompt the user for his permission for you to read some info about him via an app
-  const params = await requestAllowToRunSignature({
-    source: app.address,
-    reader: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", // Your address
-    verifier: "0xcccccccccccccccccccccccccccccccccccccccc", // Verifier for the transactions about this user
-    fee: 0, // How much should the verifier be paid for its services?
-    nonce: Date.now(), // Unique identifier for the transaction
-  });
-  // Build an app params object that can later be used to read the app
-  const appParams = await Factory.buildAppParams({
-    request: { session: params.session, readPermission: params.readPermission },
-    extraReadPermissions: params.extraReadPermissions
-  });
-  // Query the app
-  const appResult = await app.query(appParams);
-  console.log(appResult);
-  alert(appResult);
-}
+// Create a new REY UI instance with the testnet defaults (chainId, contract addressess...)
+const reyUi = createReyUi("test");
+
+// Ask the user for a write permission that allows YOU as an app to provide information
+// about that user on the reputation network. 
+const writePermission = await reyUi.requestWritePermission({
+  // YOUR app address, which will provide the information of the user
+  // after consent is given.
+  writer: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+});
+// Ssend the writePermission to a server where it can be later user when providing
+// information about the user.
+
+// Ask the user for a read permission (and related structs) that allows YOU to read
+// what an app on the reputation network has about said user
+const { session, readPermission, extraReadPermissions } = await reyUi.requestAllowToRunPermissions({
+  // YOUR app address, the one who is REQUESTING the data
+  reader: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  // The app that will provide the data about the user (if any)
+  source: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+});
+// Send the readPermission, session and extraReadPermissions to a server and build
+// there an appParams that can be used to query the app (source)
+
+// Ask the user to read its own data from a given app(source).
+// YOU WILL NOT HAVE ACCESS TO THE DATA ITSELF USING THIS METHOD
+await reyUi.openSelfRunPrompt({ source: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" })
+// The user has finished reading its data or has cancelled it, you will never know...
 ```
 
 ### Without a bundler
 
-First inlcude the REY ui script file in your page, provided by [jsDelivr](https://www.jsdelivr.com)
+Inlcude the REY ui script file in your page, provided by CDN [jsDelivr](https://www.jsdelivr.com)
 ```html
-<script src="https://cdn.jsdelivr.net/gh/reputation-network/rey-sdk-js@latest/dist/rey-sdk.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/reputation-network/rey-ui@latest/dist/rey-ui.js"></script>
 ```
 
-Then you can follow the bundler example but translating the imports into the following:
+Then you can follow the bundler example but translating the import as follows:
 ```js
-const App = window.REY.App;
-const Factory = window.REY.Structs.Factory;
-const requestAllowToRunSignature = window.REY.ui.requestAllowToRunSignature;
-const requestOptInSignature = window.REY.ui.requestOptInSignature;
+const createReyUi = window.REY.ui;
 ```
 
 ## Development 

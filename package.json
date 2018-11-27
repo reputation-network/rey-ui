@@ -20,6 +20,7 @@
     "webpack-dev-server": "^3.1.8"
   },
   "dependencies": {
+    "preact": "^8.3.1",
     "rey-sdk": "reputation-network/rey-sdk-js#0.1.0-alpha.37"
   },
   "scripts": {

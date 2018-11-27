@@ -1,0 +1,42 @@
+:host {
+  all: initial;
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.65);
+  will-change: opacity;
+}
+
+.content {
+  will-change: transform;
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes slide-up {
+  0% { transform: translateY(120px); }
+  100% { transform: translateY(0); }
+}
+
+:host-context(.entering), :host-context(.leaving) {
+  animation: fade-in 250ms forwards;
+}
+:host-context(.leaving) {
+  animation-direction: reverse;
+  background-color: transparent;
+}
+
+:host-context(.entering) .content, :host-context(.leaving) .content {
+  animation: slide-up 250ms forwards;
+}
+:host-context(.leaving) .content {
+  animation-direction: reverse;
+}
