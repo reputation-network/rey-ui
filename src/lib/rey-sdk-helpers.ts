@@ -1,6 +1,6 @@
 import * as metamaskAddon from "./metamask-addon";
 import { ReySdk } from "./rey-sdk";
-import { DummySign, EncryptionKey, Factory, MetamaskSign, SignStrategy } from "./rey-sdk";
+import { DummySign, EncryptionKey, Factory, MetamaskSign, SignStrategy, toChecksumAddress } from "./rey-sdk";
 
 interface ReySdkHelpersConfig {
   sdk: ReySdk;
@@ -136,7 +136,10 @@ function createReySdkHelpers(config: ReySdkHelpersConfig) {
       const renderDatas = await Promise.all(addresses.map(renderHelpers.buildAppRenderData));
       return renderDatas.reduce<AppRenderDataRecord>((record, renderData) => {
         if (renderData) {
-          record[renderData.address.toLowerCase()] = renderData;
+          const address = renderData.address;
+          record[toChecksumAddress(address)] = renderData;
+          record[address.toLowerCase()] = renderData;
+          record[address.toUpperCase()] = renderData;
         }
         return record;
       }, {});

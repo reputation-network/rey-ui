@@ -74,3 +74,7 @@ export { Factory, ReadPermission, Request, Session, WritePermission };
 // # App structs
 import EncryptionKey from "rey-sdk/dist/utils/encryption-key";
 export { AppParams, EncryptionKey};
+// # Utils
+import { toChecksumAddress } from "ethereumjs-util"; // fixme: This should be included on rey-sdk
+import { reyHash } from "rey-sdk/dist/utils";
+export { reyHash as hash, toChecksumAddress };
