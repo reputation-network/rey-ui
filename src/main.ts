@@ -12,7 +12,10 @@ async function createReySdkWithHelpers(config: Config) {
     registryContractAddress: config.registryContractAddress,
     reyContractAddress: config.reyContractAddress,
   });
-  const helpers = createReySdkHelpers({sdk});
+  const helpers = createReySdkHelpers({
+    sdk,
+    signStrategy: config.signStrategy,
+  });
   return {...sdk, ...helpers};
 }
 

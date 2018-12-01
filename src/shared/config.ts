@@ -5,6 +5,7 @@ import {
   RINKEBY_REY_CONTRACT_ADDRESS,
 } from "rey-sdk/dist/contracts/constants";
 import EthereumNetwork from "../lib/ethereum-networks";
+import { MetamaskSign, SignStrategy } from "../lib/rey-sdk";
 
 export type Environment = "prod" | "test" | "dev" | "custom";
 export interface Config {
@@ -12,6 +13,7 @@ export interface Config {
   chainId: string;
   registryContractAddress: string;
   reyContractAddress: string;
+  signStrategy: SignStrategy;
 }
 
 export default function createConfig(environmentOrConfig: Environment | Partial<Config>): Config {
@@ -27,6 +29,7 @@ export default function createConfig(environmentOrConfig: Environment | Partial<
         chainId: requireProperty(config, "chainId"),
         registryContractAddress: requireProperty(config, "registryContractAddress"),
         reyContractAddress: requireProperty(config, "reyContractAddress"),
+        signStrategy: requireProperty(config, "signStrategy"),
       };
     },
 
@@ -36,6 +39,7 @@ export default function createConfig(environmentOrConfig: Environment | Partial<
         chainId: (config.chainId || EthereumNetwork.REY).toString(),
         registryContractAddress: config.registryContractAddress || DEVELOPMENT_REGISTRY_CONTRACT_ADDRESS,
         reyContractAddress: config.reyContractAddress || DEVELOPMENT_REY_CONTRACT_ADDRESS,
+        signStrategy: config.signStrategy || MetamaskSign(),
       };
     },
 
@@ -45,6 +49,7 @@ export default function createConfig(environmentOrConfig: Environment | Partial<
         chainId: (config.chainId || EthereumNetwork.RINKEBY).toString(),
         registryContractAddress: config.registryContractAddress || RINKEBY_REGISTRY_CONTRACT_ADDRESS,
         reyContractAddress: config.reyContractAddress || RINKEBY_REY_CONTRACT_ADDRESS,
+        signStrategy: config.signStrategy || MetamaskSign(),
       };
     },
 

@@ -1,9 +1,10 @@
 import * as metamaskAddon from "./metamask-addon";
 import { ReySdk } from "./rey-sdk";
-import { DummySign, EncryptionKey, Factory, MetamaskSign, SignStrategy, toChecksumAddress } from "./rey-sdk";
+import { DummySign, EncryptionKey, Factory, SignStrategy, toChecksumAddress } from "./rey-sdk";
 
 interface ReySdkHelpersConfig {
   sdk: ReySdk;
+  signStrategy: SignStrategy;
   defaultVerifier?: string;
 }
 
@@ -105,13 +106,13 @@ function createReySdkHelpers(config: ReySdkHelpersConfig) {
   };
   const signHelpers = {
     buildUnsignedSession: unsigned(helpers.buildSession),
-    buildSignedSession: signed(helpers.buildSession),
     buildUnsignedReadPermission: unsigned(helpers.buildReadPermission),
-    buildSignedReadPermission: signed(helpers.buildReadPermission),
     buildUnsignedWritePermission: unsigned(helpers.buildWritePermission),
-    buildSignedWritePermission: signed(helpers.buildWritePermission),
     buildUnsignedAppParams: unsigned(helpers.buildAppParams),
-    buildSignedAppParams: signed(helpers.buildAppParams),
+    buildSignedSession: signed(helpers.buildSession, config.signStrategy),
+    buildSignedReadPermission: signed(helpers.buildReadPermission, config.signStrategy),
+    buildSignedWritePermission: signed(helpers.buildWritePermission, config.signStrategy),
+    buildSignedAppParams: signed(helpers.buildAppParams, config.signStrategy),
   };
   const renderHelpers = {
     async failsafeGetManifest(address: string) {
@@ -158,8 +159,8 @@ type StructBuilder<P, R> = (opts: P, sign: SignStrategy) => Promise<R>;
 function unsigned<P, R>(builder: StructBuilder<P, R>) {
   return (opts: P) => builder(opts, DummySign());
 }
-function signed<P, R>(builder: StructBuilder<P, R>) {
-  return (opts: P) => builder(opts, MetamaskSign());
+function signed<P, R>(builder: StructBuilder<P, R>, signStrategy?: SignStrategy) {
+  return (opts: P) => builder(opts, signStrategy);
 }
 
 interface IReadPermissionOpts {
