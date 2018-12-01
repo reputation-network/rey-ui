@@ -14,6 +14,7 @@ export interface Config {
   registryContractAddress: string;
   reyContractAddress: string;
   signStrategy: SignStrategy;
+  signButtonText: string;
 }
 
 export default function createConfig(environmentOrConfig: Environment | Partial<Config>): Config {
@@ -21,6 +22,8 @@ export default function createConfig(environmentOrConfig: Environment | Partial<
     ? { environment: environmentOrConfig }
     : environmentOrConfig;
   const environment = config.environment;
+  const signStrategy = config.signStrategy || MetamaskSign();
+  const signButtonText = config.signButtonText || "Sign with Metamask";
 
   const configByEnvironment: Record<Environment, () => Config> = {
     custom() {
@@ -29,7 +32,8 @@ export default function createConfig(environmentOrConfig: Environment | Partial<
         chainId: requireProperty(config, "chainId"),
         registryContractAddress: requireProperty(config, "registryContractAddress"),
         reyContractAddress: requireProperty(config, "reyContractAddress"),
-        signStrategy: requireProperty(config, "signStrategy"),
+        signStrategy,
+        signButtonText,
       };
     },
 
@@ -39,7 +43,8 @@ export default function createConfig(environmentOrConfig: Environment | Partial<
         chainId: (config.chainId || EthereumNetwork.REY).toString(),
         registryContractAddress: config.registryContractAddress || DEVELOPMENT_REGISTRY_CONTRACT_ADDRESS,
         reyContractAddress: config.reyContractAddress || DEVELOPMENT_REY_CONTRACT_ADDRESS,
-        signStrategy: config.signStrategy || MetamaskSign(),
+        signStrategy,
+        signButtonText,
       };
     },
 
@@ -49,7 +54,8 @@ export default function createConfig(environmentOrConfig: Environment | Partial<
         chainId: (config.chainId || EthereumNetwork.RINKEBY).toString(),
         registryContractAddress: config.registryContractAddress || RINKEBY_REGISTRY_CONTRACT_ADDRESS,
         reyContractAddress: config.reyContractAddress || RINKEBY_REY_CONTRACT_ADDRESS,
-        signStrategy: config.signStrategy || MetamaskSign(),
+        signStrategy,
+        signButtonText,
       };
     },
 

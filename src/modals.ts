@@ -23,11 +23,13 @@ async function handleModalEvents<T>(
 
 async function showOptInModal<T>(opts: {
   appRenderDataRecord: AppRenderDataRecord,
+  signButtonText: string,
   writePermission: WritePermission,
   onSign: () => Promise<T>,
 }) {
   const portal = createOptinModal({
     appRenderData: opts.appRenderDataRecord,
+    signButtonText: opts.signButtonText,
     writePermission: opts.writePermission,
   });
   document.body.appendChild(portal);
@@ -39,10 +41,12 @@ async function showAllowToRunModal<T>(opts: {
   session: Session,
   readPermission: ReadPermission,
   extraReadPermissions: ReadPermission[],
+  signButtonText: string,
   onSign: () => Promise<T>,
 }) {
   const portal = createAllowToRunModal({
     appRenderData: opts.appRenderDataRecord,
+    signButtonText: opts.signButtonText,
     session: opts.session,
     readPermission: opts.readPermission,
     extraReadPermissions: opts.extraReadPermissions,

@@ -10,6 +10,7 @@ export interface Props {
   session: Session;
   readPermission: ReadPermission;
   extraReadPermissions?: ReadPermission[];
+  signButtonText: string;
   onSignClick?: () => void;
   onCloseClick?: () => void;
 }
@@ -54,7 +55,7 @@ export class AllowToRunModal extends Component<Props> {
         appDescription={this._renderData(source).description}
         appIconUrl={this._renderData(source).iconUrl}
         preface={preface}
-        acceptButtonText="Sign with Metamask"
+        acceptButtonText={this.props.signButtonText}
         overlayContents={labels}
         onAccept={this.props.onSignClick}
         onClose={this.props.onCloseClick}

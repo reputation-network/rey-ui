@@ -76,6 +76,7 @@ function createReyUi(_config: Environment|Partial<Config>) {
       return showOptInModal({
         appRenderDataRecord,
         writePermission: _writePermission,
+        signButtonText: config.signButtonText,
         onSign: () => rey.buildSignedWritePermission(_writePermission),
       });
     },
@@ -127,6 +128,7 @@ function createReyUi(_config: Environment|Partial<Config>) {
         session: _session,
         readPermission: _readPermission,
         extraReadPermissions: _extraReadPermissions,
+        signButtonText: config.signButtonText,
         onSign: () => {
           return Promise.all([
             rey.buildSignedSession(_session),

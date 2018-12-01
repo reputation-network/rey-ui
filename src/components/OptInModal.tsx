@@ -7,6 +7,7 @@ import { WritePermissionStructLabel } from "./StructLabel";
 export interface Props {
   writePermission: any;
   appRenderData: AppRenderDataRecord;
+  signButtonText: string;
   onSignClick?: () => void;
   onCloseClick?: () => void;
 }
@@ -38,7 +39,7 @@ export class OptInModal extends Component<Props> {
         appDescription={writerData.description}
         appIconUrl={writerData.iconUrl}
         preface={preface}
-        acceptButtonText="Sign with Metamask"
+        acceptButtonText={this.props.signButtonText}
         overlayContents={[label]}
         onAccept={this.props.onSignClick}
         onClose={this.props.onCloseClick}
